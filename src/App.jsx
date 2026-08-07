@@ -361,16 +361,26 @@ export default function App() {
           <div>
             {scanStatus === "idle" && (
               <div className="text-center py-10">
-                <label
-                  className="mx-auto flex flex-col items-center justify-center gap-2 w-full py-10 rounded-2xl body-f cursor-pointer"
-                  style={{ background: CARD, border: `2px dashed ${CHILI}` }}
-                >
-                  <Camera size={32} color={CHILI} />
-                  <span className="text-sm font-semibold" style={{ color: INK }}>பேக்கெட் label புகைப்படத்தை தேர்வு செய்</span>
-                  <span className="text-xs" style={{ color: INK, opacity: 0.55 }}>Camera app-ல முதலில் photo எடுத்து, gallery-ல இருந்து இங்க upload பண்ணுங்க</span>
-                  <input type="file" accept="image/*" className="hidden"
-                    onChange={(e) => handleFile(e.target.files?.[0])} />
-                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label
+                    className="flex flex-col items-center justify-center gap-2 py-8 rounded-2xl body-f cursor-pointer"
+                    style={{ background: CARD, border: `2px dashed ${CHILI}` }}
+                  >
+                    <Camera size={28} color={CHILI} />
+                    <span className="text-sm font-semibold text-center" style={{ color: INK }}>Camera-ஐ திற</span>
+                    <input type="file" accept="image/*" capture="environment" className="hidden"
+                      onChange={(e) => handleFile(e.target.files?.[0])} />
+                  </label>
+                  <label
+                    className="flex flex-col items-center justify-center gap-2 py-8 rounded-2xl body-f cursor-pointer"
+                    style={{ background: CARD, border: `2px dashed ${CURRY}` }}
+                  >
+                    <PackageSearch size={28} color={CURRY} />
+                    <span className="text-sm font-semibold text-center" style={{ color: INK }}>Gallery-ல தேர்வு</span>
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={(e) => handleFile(e.target.files?.[0])} />
+                  </label>
+                </div>
                 <p className="body-f text-xs mt-4" style={{ color: INK, opacity: 0.5 }}>
                   label-ல உள்ள எழுத்துக்கள் தெளிவா தெரியுற மாதிரி, நல்ல வெளிச்சத்துல புகைப்படம் எடுங்க
                 </p>
