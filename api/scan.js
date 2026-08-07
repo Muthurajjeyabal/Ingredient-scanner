@@ -1,14 +1,20 @@
 // Serverless function (Vercel). Runs on the server, so the API key
 // never gets exposed to the browser. Deploys automatically as /api/scan.
+// Uses Google Gemini's free API tier (no credit card required) instead of Anthropic.
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "method_not_allowed" });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "server_missing_api_key" });
+    // Diagnostic: list env var NAMES containing "GEMINI" or "API" (never values)
+    // so we can see if the variable exists under a slightly different name.
+    const relatedKeys = Object.keys(process.env).filter(
+      (k) => k.toUpperCase().includes("GEMINI") || k.toUpperCase().includes("API")
+    );
+    return res.status(500).json({ error: "server_missing_api_key", relatedKeys });
   }
 
   const { mediaType, base64, prompt } = req.body || {};
@@ -17,35 +23,36 @@ export default async function handler(req, res) {
   }
 
   try {
-    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1200,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
-              { type: "text", text: prompt },
-            ],
-          },
-        ],
-      }),
-    });
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { inline_data: { mime_type: mediaType, data: base64 } },
+                { text: prompt },
+              ],
+            },
+          ],
+        }),
+      }
+    );
 
-    const data = await anthropicRes.json();
+    const data = await geminiRes.json();
 
-    if (!anthropicRes.ok) {
-      return res.status(anthropicRes.status).json({ error: "anthropic_error", detail: data });
+    if (!geminiRes.ok) {
+      return res.status(geminiRes.status).json({ error: "gemini_error", detail: data });
     }
 
-    return res.status(200).json(data);
+    // Reshape Gemini's response into the same { content: [{type:"text", text}] }
+    // shape the frontend already expects (originally written for Anthropic),
+    // so App.jsx doesn't need to change.
+    const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("\n") || "";
+
+    return res.status(200).json({ content: [{ type: "text", text }] });
   } catch (err) {
     return res.status(500).json({ error: "proxy_failed", detail: String(err) });
   }
