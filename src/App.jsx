@@ -172,6 +172,39 @@ function fileToBase64(file) {
   });
 }
 
+// Resizes/compresses a photo client-side before upload, so large phone-camera
+// photos (often several MB) don't exceed the serverless function's request
+// size limit and cause the request to fail outright.
+function compressImage(file, maxDimension = 1280, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > height && width > maxDimension) {
+        height = Math.round((height * maxDimension) / width);
+        width = maxDimension;
+      } else if (height > maxDimension) {
+        width = Math.round((width * maxDimension) / height);
+        height = maxDimension;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      const dataUrl = canvas.toDataURL("image/jpeg", quality);
+      resolve({ base64: dataUrl.split(",")[1], mediaType: "image/jpeg" });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("image_decode_failed"));
+    };
+    img.src = url;
+  });
+}
+
 function extractJson(text) {
   const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
   const start = cleaned.indexOf("{");
@@ -206,8 +239,7 @@ export default function App() {
     setImgPreview(URL.createObjectURL(file));
 
     try {
-      const base64 = await fileToBase64(file);
-      const mediaType = file.type || "image/jpeg";
+      const { base64, mediaType } = await compressImage(file);
 
       const prompt = `இது ஒரு இந்திய தயாரிப்பின் (உணவு அல்லது cosmetic) packet/label புகைப்படம். இதில் தெரியும் ingredients list, nutrition facts, brand பெயரை படித்து, கீழ்க்கண்ட shape-ல மட்டும் raw JSON கொடு (markdown fence வேண்டாம், commentary வேண்டாம்):
 {
@@ -250,7 +282,12 @@ export default function App() {
       setScanResult(parsed);
       setScanStatus("done");
     } catch (err) {
-      setScanError(err.message || String(err));
+      const msg = err.message || String(err);
+      setScanError(
+        msg.includes("Failed to fetch")
+          ? "Network பிரச்சனை — இணையம் சரியா இருக்கான்னு பாத்து மறுபடியும் முயற்சி பண்ணுங்க"
+          : msg
+      );
       setScanStatus("error");
     }
   };
