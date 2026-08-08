@@ -6,10 +6,10 @@ import "./index.css";
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, message: "", stack: "" };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, message: error?.message || String(error), stack: error?.stack || "" };
   }
   componentDidCatch(error, info) {
     // eslint-disable-next-line no-console
@@ -33,9 +33,27 @@ class ErrorBoundary extends React.Component {
           }}
         >
           <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Something went wrong</p>
-          <p style={{ fontSize: 13, color: "#8B9A8E", marginBottom: 20, maxWidth: 320 }}>
+          <p style={{ fontSize: 13, color: "#8B9A8E", marginBottom: 12, maxWidth: 320 }}>
             That result may have come back in an unexpected format. Try again — your recent scans are still saved.
           </p>
+          <div
+            style={{
+              background: "#161D19",
+              border: "1px solid #2A342D",
+              borderRadius: 12,
+              padding: "12px",
+              maxWidth: 340,
+              marginBottom: 20,
+              textAlign: "left",
+            }}
+          >
+            <p style={{ fontSize: 11, color: "#FF6152", fontFamily: "monospace", wordBreak: "break-word", margin: 0 }}>
+              {this.state.message}
+            </p>
+            <p style={{ fontSize: 10, color: "#8B9A8E", fontFamily: "monospace", wordBreak: "break-word", marginTop: 6, whiteSpace: "pre-wrap" }}>
+              {this.state.stack.split("\n").slice(0, 4).join("\n")}
+            </p>
+          </div>
           <button
             onClick={() => window.location.reload()}
             style={{
