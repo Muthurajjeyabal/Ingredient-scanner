@@ -280,6 +280,8 @@ function analyzeSafety(item) {
   const n = item.nutrition;
   if (n?.sugar_g != null && n.sugar_g > 22) flags.push({ type: "sugar", value: n.sugar_g });
   if (n?.salt_g != null && n.salt_g > 1.5) flags.push({ type: "salt", value: n.salt_g });
+  if (n?.fat_g != null && n.fat_g > 20) flags.push({ type: "fat", value: n.fat_g });
+  if (n?.calories_kcal_per_100g != null && n.calories_kcal_per_100g > 400) flags.push({ type: "calorie", value: n.calories_kcal_per_100g });
 
   let level = "clean";
   if (flags.length >= 3) level = "high";
@@ -292,21 +294,28 @@ function formatReasons(flags, t) {
     if (f.type === "additive") return t.additiveNotes[f.key] || f.key;
     if (f.type === "sugar") return `${t.highSugar} (${f.value}g/100g)`;
     if (f.type === "salt") return `${t.highSalt} (${f.value}g/100g)`;
+    if (f.type === "fat") return `${t.highFat} (${f.value}g/100g)`;
+    if (f.type === "calorie") return `${t.highCalorie} (${f.value}kcal/100g)`;
     return "";
   });
 }
 
-function computeHealthInsights(item) {
-  const { level, flags } = analyzeSafety(item);
+function levelFromCount(count) {
+  if (count >= 3) return "high";
+  if (count >= 1) return "moderate";
+  return "clean";
+}
+
+function computeProductInsight(item, t) {
+  const { flags } = analyzeSafety(item);
   const chemicals = item.chemicals || [];
-  const allergens = item.allergens || [];
-  const n = item.nutrition;
+  const ingredientFlags = flags.filter((f) => f.type === "additive");
+  const nutritionFlags = flags.filter((f) => f.type !== "additive");
 
-  const score = Math.max(10, 100 - flags.length * 18);
-
-  const sugarScore = n?.sugar_g != null ? Math.max(0, Math.round(100 - Math.min(100, n.sugar_g * 3))) : null;
-  const sodiumScore = n?.salt_g != null ? Math.max(0, Math.round(100 - Math.min(100, n.salt_g * 55))) : null;
-  const additivesScore = Math.max(0, Math.round(100 - chemicals.length * 20));
+  const ingredientLevel = levelFromCount(ingredientFlags.length);
+  const nutritionLevel = levelFromCount(nutritionFlags.length);
+  const order = { clean: 0, moderate: 1, high: 2 };
+  const overall = order[ingredientLevel] >= order[nutritionLevel] ? ingredientLevel : nutritionLevel;
 
   let processing = "procMinimal";
   if (chemicals.length >= 5) processing = "procUltra";
@@ -314,68 +323,74 @@ function computeHealthInsights(item) {
   else if (chemicals.length >= 1) processing = "procModerate";
 
   const carefulKeys = [];
-  if (allergens.length > 0) carefulKeys.push("carefulAllergy");
-  if (flags.some((f) => f.type === "salt")) carefulKeys.push("carefulSodium");
-  if (flags.some((f) => f.type === "sugar")) carefulKeys.push("carefulSugar");
-  if (level !== "clean") carefulKeys.push("carefulChildren");
+  if ((item.allergens || []).length > 0) carefulKeys.push("carefulAllergy");
+  if (nutritionFlags.some((f) => f.type === "salt")) carefulKeys.push("carefulSodium");
+  if (nutritionFlags.some((f) => f.type === "sugar")) carefulKeys.push("carefulSugar");
+  if (overall !== "clean") carefulKeys.push("carefulChildren");
 
-  return { level, score, sugarScore, sodiumScore, additivesScore, processing, carefulKeys };
+  return {
+    overall,
+    ingredientLevel, ingredientReasons: formatReasons(ingredientFlags, t),
+    nutritionLevel, nutritionReasons: formatReasons(nutritionFlags, t),
+    processing, carefulKeys,
+  };
 }
 
-function ScoreBar({ label, value, color }) {
-  if (value == null) return null;
-  return (
-    <div className="mb-2">
-      <div className="flex items-center justify-between mb-1">
-        <span className="body-f text-xs" style={{ color: MUTED }}>{label}</span>
-        <span className="mono-f text-xs font-semibold" style={{ color: TEXT }}>{value}</span>
-      </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
-        <div className="h-full rounded-full" style={{ width: `${value}%`, background: color }} />
-      </div>
-    </div>
-  );
-}
+function ProductInsightCard({ item, t, sourceLabel }) {
+  const insight = computeProductInsight(item, t);
+  const color = { clean: LIME, moderate: AMBER, high: CORAL }[insight.overall];
+  const choiceLabel = { clean: t.choiceEveryday, moderate: t.choiceOccasional, high: t.choiceRare }[insight.overall];
+  const verdictText = insight.overall === "clean" ? t.verdictEveryday : insight.overall === "moderate" ? t.freqModerate : t.freqHigh;
 
-function HealthScoreCard({ item, t }) {
-  const { level, score, sugarScore, sodiumScore, additivesScore, processing, carefulKeys } = computeHealthInsights(item);
-  const color = { clean: LIME, moderate: AMBER, high: CORAL }[level];
+  const Row = ({ title, level, reasons }) => {
+    const dot = { clean: LIME, moderate: AMBER, high: CORAL }[level];
+    return (
+      <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <p className="body-f text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{title}</p>
+        <div className="flex items-start gap-2">
+          <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
+          {reasons.length === 0 ? (
+            <p className="body-f text-sm" style={{ color: TEXT }}>{t.noMajorConcern}</p>
+          ) : (
+            <div className="flex-1 space-y-1">
+              {reasons.map((r, i) => (
+                <p key={i} className="body-f text-sm" style={{ color: TEXT }}>{r}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="mb-6 rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
-      <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
-        <div className="flex items-center justify-between mb-1">
-          <span className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.healthScore}</span>
-          <span className="mono-f text-2xl font-bold" style={{ color }}>{score}</span>
-        </div>
-        <ScoreBar label={t.sugar} value={sugarScore} color={LIME} />
-        <ScoreBar label={t.salt} value={sodiumScore} color={LIME} />
-        <ScoreBar label={t.additivesTitle} value={additivesScore} color={LIME} />
+      <div className="p-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <span className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.overallChoice}</span>
+        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: color + "1a", color }}>
+          <span className="w-2 h-2 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+          {choiceLabel}
+        </span>
       </div>
 
       <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
         <p className="body-f text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{t.verdict}</p>
-        <p className="body-f text-sm" style={{ color: TEXT }}>
-          {level === "clean" ? t.safeCleanSub : level === "moderate" ? t.freqModerate : t.freqHigh}
-        </p>
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: LIME + "1a", color: LIME }}>{t.bestFor}</span>
-          {level !== "clean" && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: CORAL + "1a", color: CORAL }}>{t.notIdealFor}</span>
-          )}
-        </div>
+        <p className="body-f text-sm" style={{ color: TEXT }}>{verdictText}</p>
       </div>
 
-      <div className="p-4" style={{ borderBottom: carefulKeys.length ? `1px solid ${BORDER}` : "none" }}>
+      <Row title={t.ingredientAssessment} level={insight.ingredientLevel} reasons={insight.ingredientReasons} />
+      <Row title={t.nutritionAssessment} level={insight.nutritionLevel} reasons={insight.nutritionReasons} />
+
+      <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
         <p className="body-f text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{t.processing}</p>
-        <p className="body-f text-sm" style={{ color: TEXT }}>{t[processing]}</p>
+        <p className="body-f text-sm" style={{ color: TEXT }}>{t[insight.processing]}</p>
       </div>
 
-      {carefulKeys.length > 0 && (
-        <div className="p-4">
+      {insight.carefulKeys.length > 0 && (
+        <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <p className="body-f text-xs font-bold uppercase tracking-widest mb-2" style={{ color: MUTED }}>{t.careful}</p>
           <div className="flex flex-wrap gap-1.5">
-            {carefulKeys.map((k) => (
+            {insight.carefulKeys.map((k) => (
               <span key={k} className="px-2.5 py-1 rounded-full text-[11px] font-medium" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
                 {t[k]}
               </span>
@@ -383,88 +398,24 @@ function HealthScoreCard({ item, t }) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
 
-// ---------- Small UI pieces ----------
-function Chip({ children, tone = "line" }) {
-  const styles = {
-    line: { background: "transparent", border: `1px solid ${BORDER}`, color: TEXT },
-    coral: { background: CORAL + "1f", border: `1px solid ${CORAL}55`, color: "#FFD3CC" },
-    amber: { background: AMBER + "1f", border: `1px solid ${AMBER}55`, color: "#FFE3B0" },
-  }[tone];
-  return (
-    <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-medium tracking-wide mr-1.5 mb-1.5" style={styles}>
-      {children}
-    </span>
-  );
-}
-
-function Nutrient({ label, value, unit }) {
-  if (value === undefined || value === null) return null;
-  return (
-    <div className="flex items-baseline justify-between py-2.5" style={{ borderBottom: `1px solid ${BORDER}` }}>
-      <span className="text-sm" style={{ color: MUTED }}>{label}</span>
-      <span className="mono-f text-sm font-semibold" style={{ color: TEXT }}>
-        {value}{unit ? <span style={{ color: MUTED }} className="ml-1">{unit}</span> : null}
-      </span>
-    </div>
-  );
-}
-
-function SafetyBadge({ item, t }) {
-  const { level, flags } = analyzeSafety(item);
-  const reasons = formatReasons(flags, t);
-  const config = {
-    clean: { color: LIME, label: t.safeCleanLabel, sub: t.safeCleanSub },
-    moderate: { color: AMBER, label: t.safeModerateLabel, sub: `${reasons.length} ${t.thingsToKnow}` },
-    high: { color: CORAL, label: t.safeHighLabel, sub: `${reasons.length} ${t.thingsToKnow}` },
-  }[level];
-  return (
-    <div
-      className="mb-5 rounded-2xl overflow-hidden"
-      style={{ background: SURFACE_2, border: `1px solid ${config.color}40` }}
-    >
-      <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: reasons.length ? `1px solid ${BORDER}` : "none" }}>
-        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: config.color, boxShadow: `0 0 12px ${config.color}` }} />
-        <div className="min-w-0">
-          <p className="body-f text-sm font-semibold" style={{ color: TEXT }}>{config.label}</p>
-          <p className="body-f text-xs" style={{ color: MUTED }}>{config.sub}</p>
-        </div>
+      <div className="p-4">
+        <p className="body-f text-xs font-bold mb-1" style={{ color: AMBER }}>⚠️ {t.important}</p>
+        <p className="body-f text-[11px] leading-relaxed" style={{ color: MUTED }}>{t.assessmentNote}</p>
+        {sourceLabel && <p className="body-f text-[11px] mt-1.5" style={{ color: MUTED }}>{t.verifyNote}</p>}
       </div>
-      {reasons.length > 0 && (
-        <ul className="px-4 py-3 space-y-1.5">
-          {reasons.map((r, i) => (
-            <li key={i} className="body-f text-xs flex items-start gap-2" style={{ color: TEXT, opacity: 0.85 }}>
-              <span style={{ color: config.color }} className="mt-0.5">·</span>{r}
-            </li>
-          ))}
-        </ul>
-      )}
-      {(level === "moderate" || level === "high") && (
-        <div className="px-4 pb-3">
-          <p className="body-f text-xs font-medium" style={{ color: config.color }}>
-            {level === "moderate" ? t.freqModerate : t.freqHigh}
-          </p>
-        </div>
-      )}
-      <p className="px-4 pb-3 body-f text-[10px]" style={{ color: MUTED }}>
-        {t.safetyDisclaimer}
-      </p>
     </div>
   );
 }
+
 
 function buildShareText(data, t) {
-  const { level, flags } = analyzeSafety(data);
-  const reasons = formatReasons(flags, t);
-  const label = { clean: t.safeCleanLabel, moderate: t.safeModerateLabel, high: t.safeHighLabel }[level];
+  const insight = computeProductInsight(data, t);
+  const choiceLabel = { clean: t.choiceEveryday, moderate: t.choiceOccasional, high: t.choiceRare }[insight.overall];
   const name = data.name || data.product_name;
-  let text = `${name}${data.brand ? ` (${data.brand})` : ""}\n\n${label}`;
-  if (reasons.length) text += `\n${reasons.map((r) => `• ${r}`).join("\n")}`;
-  if (level === "moderate") text += `\n${t.freqModerate}`;
-  if (level === "high") text += `\n${t.freqHigh}`;
+  let text = `${name}${data.brand ? ` (${data.brand})` : ""}\n\n${t.overallChoice}: ${choiceLabel}`;
+  if (insight.ingredientReasons.length) text += `\n${insight.ingredientReasons.map((r) => `• ${r}`).join("\n")}`;
+  if (insight.nutritionReasons.length) text += `\n${insight.nutritionReasons.map((r) => `• ${r}`).join("\n")}`;
   if (data.ingredients) text += `\n\n${t.ingredientsTitle}: ${data.ingredients}`;
   if (data.nutrition?.calories_kcal_per_100g != null) {
     text += `\n\n${t.calories}: ${data.nutrition.calories_kcal_per_100g} kcal/100g`;
@@ -594,12 +545,7 @@ function DetailCard({ data, sourceLabel, t }) {
       </div>
 
       <div className="p-5">
-        <HealthScoreCard item={data} t={t} />
-        <SafetyBadge item={data} t={t} />
-
-        {sourceLabel && (
-          <p className="body-f text-[10px] mb-5 -mt-3" style={{ color: MUTED }}>{t.verifyNote}</p>
-        )}
+        <ProductInsightCard item={data} t={t} sourceLabel={sourceLabel} />
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2.5">
