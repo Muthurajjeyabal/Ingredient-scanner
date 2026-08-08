@@ -265,6 +265,45 @@ function asText(v) {
   return Array.isArray(v) ? v.join(", ") : String(v);
 }
 
+// Picks a representative emoji for a key ingredient by simple keyword
+// matching — kept client-side (not AI-chosen) so it's fast and consistent.
+const INGREDIENT_ICONS = [
+  { kw: ["milk", "dairy", "cream", "whey", "curd", "paneer", "cheese"], icon: "🥛" },
+  { kw: ["sugar", "glucose", "fructose", "syrup", "honey", "jaggery", "dextrose", "sweeten"], icon: "🍬" },
+  { kw: ["starch", "flour", "wheat", "maida", "gram", "besan", "corn meal", "rice"], icon: "🌽" },
+  { kw: ["salt", "sodium chloride"], icon: "🧂" },
+  { kw: ["oil", "fat", "ghee", "butter", "palm"], icon: "🧈" },
+  { kw: ["egg"], icon: "🥚" },
+  { kw: ["flavour", "flavor", "essence", "aroma"], icon: "🧪" },
+  { kw: ["colour", "color", "carotene", "tartrazine", "annatto"], icon: "🎨" },
+  { kw: ["acid", "preservative", "sorbate", "benzoate", "edta", "bht"], icon: "🧫" },
+  { kw: ["cocoa", "chocolate"], icon: "🍫" },
+  { kw: ["fruit", "mango", "apple", "orange", "berry", "pulp"], icon: "🍓" },
+  { kw: ["spice", "pepper", "chilli", "chili", "masala", "herb"], icon: "🌶️" },
+  { kw: ["vitamin", "mineral", "calcium", "iron", "fortif"], icon: "💊" },
+  { kw: ["water", "aqua"], icon: "💧" },
+  { kw: ["fragrance", "perfume", "parfum"], icon: "🌸" },
+  { kw: ["surfactant", "sulfate", "betaine", "sarcosinate"], icon: "🫧" },
+];
+function ingredientIcon(name) {
+  const n = (name || "").toLowerCase();
+  for (const { kw, icon } of INGREDIENT_ICONS) {
+    if (kw.some((k) => n.includes(k))) return icon;
+  }
+  return "•";
+}
+
+// Returns whole days between today and an ISO date string, or null if the
+// string isn't a valid, parseable date.
+function daysUntil(isoDate) {
+  if (!isoDate || typeof isoDate !== "string") return null;
+  const target = new Date(isoDate + "T00:00:00");
+  if (isNaN(target.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target - today) / 86400000);
+}
+
 // ---------- Small UI pieces ----------
 function Chip({ children, tone = "line" }) {
   const styles = {
@@ -601,12 +640,40 @@ function DetailCard({ data, sourceLabel, t }) {
       <div className="p-5">
         <ProductInsightCard item={data} t={t} sourceLabel={sourceLabel} />
 
-        {asText(data.ingredients) && (
+        {Array.isArray(data.key_ingredients) && data.key_ingredients.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2.5">
+              <Search size={15} color={LIME} />
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.whatsInside}</h3>
+            </div>
+            <div className="rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
+              {data.key_ingredients.map((k, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 px-4 py-2.5"
+                  style={{ borderBottom: i < data.key_ingredients.length - 1 ? `1px solid ${BORDER}` : "none" }}
+                >
+                  <span className="text-base shrink-0">{ingredientIcon(k?.name)}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="body-f text-sm font-semibold truncate" style={{ color: TEXT }}>{asText(k?.name)}</p>
+                  </div>
+                  <span className="body-f text-[11px] shrink-0" style={{ color: MUTED }}>{asText(k?.role)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {(asText(data.meaning) || asText(data.ingredients)) && (
           <div className="mb-6 rounded-2xl p-4" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
             <p className="body-f text-xs font-bold mb-1" style={{ color: LIME }}>💡 {t.didYouKnow}</p>
-            <p className="body-f text-xs leading-relaxed" style={{ color: MUTED }}>
-              <span style={{ color: TEXT, fontWeight: 600 }}>{asText(data.ingredients).split(",")[0].trim()}</span> — {t.firstIngredientNote}
-            </p>
+            {asText(data.meaning) ? (
+              <p className="body-f text-xs leading-relaxed" style={{ color: MUTED }}>{asText(data.meaning)}</p>
+            ) : (
+              <p className="body-f text-xs leading-relaxed" style={{ color: MUTED }}>
+                <span style={{ color: TEXT, fontWeight: 600 }}>{asText(data.ingredients).split(",")[0].trim()}</span> — {t.firstIngredientNote}
+              </p>
+            )}
           </div>
         )}
 
@@ -657,6 +724,35 @@ function DetailCard({ data, sourceLabel, t }) {
             {typeof nutrition.fat_g === "number" && typeof nutrition.calories_kcal_per_100g === "number" && nutrition.calories_kcal_per_100g > 0 && (nutrition.fat_g * 9) / nutrition.calories_kcal_per_100g > 0.5 && (
               <p className="body-f text-xs mt-2.5" style={{ color: MUTED }}>🥑 {t.mostCaloriesFromFat}</p>
             )}
+          </div>
+        )}
+
+        {(data.mfg_date_text || data.expiry_date_text || data.expiry_date_iso) && (
+          <div className="mb-6 rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
+            <div className="p-4 flex items-center gap-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
+              <span className="text-sm">📅</span>
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.datesTitle}</h3>
+            </div>
+            <div className="p-4">
+              {data.mfg_date_text && <Nutrient label={t.mfgDateLabel} value={asText(data.mfg_date_text)} />}
+              {data.expiry_date_text && <Nutrient label={t.expiryDateLabel} value={asText(data.expiry_date_text)} />}
+              {(() => {
+                const d = daysUntil(data.expiry_date_iso);
+                if (d === null) return null;
+                const expired = d < 0;
+                const soon = !expired && d <= 30;
+                const color = expired ? CORAL : soon ? AMBER : LIME;
+                const text = expired
+                  ? `${t.expiredLabel} · ${Math.abs(d)} ${t.daysWord} ${t.agoWord}`
+                  : `${t.expiresInLabel} ${d} ${t.daysWord}`;
+                return (
+                  <div className="flex items-center gap-2 mt-2.5 pt-2.5" style={{ borderTop: `1px solid ${BORDER}` }}>
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+                    <span className="body-f text-sm font-semibold" style={{ color }}>{text}</span>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         )}
       </div>
@@ -904,20 +1000,31 @@ export default function App() {
     try {
       const { base64, mediaType } = await compressImage(file, 1024, 0.7);
 
-      const prompt = `This is a photo of the back-of-pack label for an Indian ${mode === "food" ? "food/grocery" : "personal-care/cosmetic"} product. Read the ingredients list, nutrition facts, and brand name visible in the image, then respond with ONLY a raw JSON object (no markdown fences, no commentary) in exactly this shape:
+      const today = new Date().toISOString().slice(0, 10);
+      const prompt = `This is a photo of the back-of-pack label for an Indian ${mode === "food" ? "food/grocery" : "personal-care/cosmetic"} product. Read the ingredients list, nutrition facts, brand name, and any manufacturing/expiry date printed on the label, then respond with ONLY a raw JSON object (no markdown fences, no commentary) in exactly this shape:
 {
   "name": string,
   "brand": string,
   "summary": string,
   "ingredients": string,
+  "key_ingredients": [{ "name": string, "role": string }],
+  "meaning": string,
   "chemicals": string[],
   "allergens": string[],
   "nutrition": ${mode === "food" ? `{ "calories_kcal_per_100g": number|null, "protein_g": number|null, "fat_g": number|null, "sugar_g": number|null, "carbs_g": number|null, "salt_g": number|null }` : "null"},
+  "mfg_date_text": string|null,
+  "expiry_date_text": string|null,
+  "expiry_date_iso": string|null,
   "confidence": "high" | "partial"
 }
 "summary" is one short plain sentence describing what kind of product this is and its main ingredient base (e.g. "A vegetable-oil based mayonnaise with egg and preservatives.") — written for someone who knows nothing about the product yet.
+"key_ingredients" is a list of the 4-7 most significant ingredients IN THE ORDER THEY APPEAR on the label (which is largest-quantity first), each with a short "role" word (e.g. "Main base", "Sweetener", "Thickener", "Preservative", "Colour", "Flavour", "Emulsifier"). Only include what is actually declared on the label — never guess or invent an ingredient that isn't printed there.
+"meaning" is one short interpretive sentence about what this ingredient mix tells the person — e.g. that a fruit-flavoured product isn't necessarily made mostly of that fruit, or that a product has several formulation/texture additives beyond its main base. Base this ONLY on what's printed on the label — if there's nothing notable to add beyond the summary, repeat the key point simply rather than inventing something.
+"mfg_date_text" is the manufacturing/packing date exactly as printed on the label (e.g. "07/2026" or "MFD: 15/07/2026"), or null if not visible.
+"expiry_date_text" is the expiry/"best before" text exactly as printed (e.g. "06/2027" or "Best before 12 months from mfg"), or null if not visible.
+"expiry_date_iso" is the actual expiry date in strict YYYY-MM-DD format, but ONLY if you can confidently determine an exact date — either because a full date is printed, or because both a manufacturing date and a relative duration (like "9 months from mfg") are printed and you can calculate it. Today's date is ${today}, for reference only — do not use it as the expiry date. If you can't confidently determine an exact date, set this to null rather than guessing.
 "confidence" should be "partial" if any part of the ingredients or nutrition text was blurry, cut off, or you had to guess at a word — otherwise "high".
-Write the "summary", "ingredients" and "allergens" values in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
+Write the "summary", "meaning", "ingredients", "allergens", and each key_ingredients "role"/"name" in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
 If the label truly isn't readable, respond with only: {"error": "Couldn't read the label clearly — try a closer, well-lit photo"}`;
 
       const response = await fetch("/api/scan", {
