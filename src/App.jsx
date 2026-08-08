@@ -599,11 +599,65 @@ function DetailCard({ data, sourceLabel, t }) {
 }
 
 // ---------- Image + AI helpers ----------
-function compressImage(file, maxDimension = 1280, quality = 0.75) {
+// Uses createImageBitmap with a resize hint where available — this lets the
+// browser decode the photo already downscaled instead of first allocating a
+// full-resolution buffer (12MP+ phone camera photos can otherwise exhaust
+// memory and crash the tab/WebView, showing a blank white screen).
+async function compressImage(file, maxDimension = 1280, quality = 0.75) {
+  const canvasToBase64 = (canvas) =>
+    new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("compress_failed"));
+          const reader = new FileReader();
+          reader.onload = () => resolve({ base64: reader.result.split(",")[1], mediaType: "image/jpeg" });
+          reader.onerror = () => reject(new Error("read_failed"));
+          reader.readAsDataURL(blob);
+        },
+        "image/jpeg",
+        quality
+      );
+    });
+
+  if (typeof createImageBitmap === "function") {
+    try {
+      // Reading natural dimensions via <img> only needs the header, not a
+      // full pixel decode — cheap even for a huge photo.
+      const { width: srcW, height: srcH } = await new Promise((resolve, reject) => {
+        const probe = new Image();
+        const probeUrl = URL.createObjectURL(file);
+        probe.onload = () => {
+          resolve({ width: probe.naturalWidth, height: probe.naturalHeight });
+          URL.revokeObjectURL(probeUrl);
+        };
+        probe.onerror = () => {
+          URL.revokeObjectURL(probeUrl);
+          reject(new Error("probe_failed"));
+        };
+        probe.src = probeUrl;
+      });
+
+      const scale = Math.min(1, maxDimension / Math.max(srcW, srcH));
+      const targetW = Math.max(1, Math.round(srcW * scale));
+      const targetH = Math.max(1, Math.round(srcH * scale));
+
+      const bitmap = await createImageBitmap(file, { resizeWidth: targetW, resizeHeight: targetH, resizeQuality: "medium" });
+      const canvas = document.createElement("canvas");
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+      bitmap.close?.();
+      return await canvasToBase64(canvas);
+    } catch {
+      // fall through to the <img>-based method below
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
-    img.onload = () => {
+    img.onload = async () => {
       let { width, height } = img;
       if (width > height && width > maxDimension) {
         height = Math.round((height * maxDimension) / width);
@@ -618,8 +672,11 @@ function compressImage(file, maxDimension = 1280, quality = 0.75) {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, width, height);
       URL.revokeObjectURL(url);
-      const dataUrl = canvas.toDataURL("image/jpeg", quality);
-      resolve({ base64: dataUrl.split(",")[1], mediaType: "image/jpeg" });
+      try {
+        resolve(await canvasToBase64(canvas));
+      } catch (err) {
+        reject(err);
+      }
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
