@@ -250,6 +250,21 @@ const DB = [
 // ---------- Safety heuristic ----------
 // Matches against item.ingredients + item.chemicals (chemicals stay English always).
 // Returns keys, not display text — components look up the translated note via t.additiveNotes[key].
+// AI-scanned results don't always come back in the exact shape we asked for
+// (e.g. "chemicals" as a single string instead of an array). Coercing
+// defensively here prevents a render crash (blank white screen) when that
+// happens — a raw .join()/.map() on a non-array would throw and unmount
+// the whole app since there's no error boundary.
+function asArray(v) {
+  if (Array.isArray(v)) return v;
+  if (v == null || v === "") return [];
+  return [String(v)];
+}
+function asText(v) {
+  if (v == null) return "";
+  return Array.isArray(v) ? v.join(", ") : String(v);
+}
+
 const FLAGGED_ADDITIVES = [
   { kw: "sodium lauryl sulfate", key: "sls" },
   { kw: "sodium laureth sulfate", key: "sls" },
@@ -271,7 +286,7 @@ const FLAGGED_ADDITIVES = [
 ];
 
 function analyzeSafety(item) {
-  const haystack = `${item.ingredients || ""} ${(item.chemicals || []).join(" ")}`.toLowerCase();
+  const haystack = `${asText(item.ingredients)} ${asArray(item.chemicals).join(" ")}`.toLowerCase();
   const flagKeys = [];
   for (const f of FLAGGED_ADDITIVES) {
     if (haystack.includes(f.kw) && !flagKeys.includes(f.key)) flagKeys.push(f.key);
@@ -308,7 +323,7 @@ function levelFromCount(count) {
 
 function computeProductInsight(item, t) {
   const { flags } = analyzeSafety(item);
-  const chemicals = item.chemicals || [];
+  const chemicals = asArray(item.chemicals);
   const ingredientFlags = flags.filter((f) => f.type === "additive");
   const nutritionFlags = flags.filter((f) => f.type !== "additive");
 
@@ -323,7 +338,7 @@ function computeProductInsight(item, t) {
   else if (chemicals.length >= 1) processing = "procModerate";
 
   const carefulKeys = [];
-  if ((item.allergens || []).length > 0) carefulKeys.push("carefulAllergy");
+  if (asArray(item.allergens).length > 0) carefulKeys.push("carefulAllergy");
   if (nutritionFlags.some((f) => f.type === "salt")) carefulKeys.push("carefulSodium");
   if (nutritionFlags.some((f) => f.type === "sugar")) carefulKeys.push("carefulSugar");
   if (overall !== "clean") carefulKeys.push("carefulChildren");
@@ -501,8 +516,8 @@ function HowItWorks({ onClose, t }) {
 }
 
 function DetailCard({ data, sourceLabel, t }) {
-  const chemicals = data.chemicals || [];
-  const allergens = data.allergens || [];
+  const chemicals = asArray(data.chemicals);
+  const allergens = asArray(data.allergens);
   const nutrition = data.nutrition;
   const [toast, setToast] = useState("");
 
@@ -553,7 +568,7 @@ function DetailCard({ data, sourceLabel, t }) {
             <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.ingredientsTitle}</h3>
           </div>
           <p className="body-f text-[15px] leading-relaxed" style={{ color: TEXT, opacity: 0.9 }}>
-            {data.ingredients || t.ingredientsUnavailable}
+            {asText(data.ingredients) || t.ingredientsUnavailable}
           </p>
         </div>
 
@@ -563,7 +578,7 @@ function DetailCard({ data, sourceLabel, t }) {
               <FlaskConical size={15} color={CORAL} />
               <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.additivesTitle}</h3>
             </div>
-            <div className="flex flex-wrap">{chemicals.map((a, i) => <Chip key={i} tone="coral">{a}</Chip>)}</div>
+            <div className="flex flex-wrap">{chemicals.map((a, i) => <Chip key={i} tone="coral">{asText(a)}</Chip>)}</div>
           </div>
         )}
 
@@ -573,7 +588,7 @@ function DetailCard({ data, sourceLabel, t }) {
               <AlertTriangle size={15} color={AMBER} />
               <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.allergensTitle}</h3>
             </div>
-            <div className="flex flex-wrap">{allergens.map((a, i) => <Chip key={i} tone="amber">{a}</Chip>)}</div>
+            <div className="flex flex-wrap">{allergens.map((a, i) => <Chip key={i} tone="amber">{asText(a)}</Chip>)}</div>
           </div>
         )}
 
@@ -767,7 +782,10 @@ export default function App() {
   const [recentScans, setRecentScans] = useState(() => {
     try {
       const saved = localStorage.getItem("insider_scanned_products");
-      return saved ? JSON.parse(saved) : [];
+      const parsed = saved ? JSON.parse(saved) : [];
+      // Drop any previously-saved entries that lack a usable name — these
+      // were crashing Browse's search (p.name.toLowerCase() on undefined).
+      return Array.isArray(parsed) ? parsed.filter((p) => typeof (p?.name || p?.product_name) === "string" && (p.name || p.product_name).trim()) : [];
     } catch {
       return [];
     }
@@ -777,6 +795,9 @@ export default function App() {
   // mode it was scanned under, so it becomes searchable in Browse too —
   // the app's own database grows from real scans over time.
   const saveToRecent = (item) => {
+    const usableName = typeof (item?.name || item?.product_name) === "string" ? (item.name || item.product_name).trim() : "";
+    if (!usableName) return; // nothing sensible to search by later — skip saving
+
     setRecentScans((prev) => {
       const withoutDupe = prev.filter(
         (p) => (p.name || p.product_name) !== (item.name || item.product_name)
@@ -797,7 +818,7 @@ export default function App() {
       .filter((p) => (p.category || "food") === mode)
       .map((p) => ({
         id: `scanned-${p.name || p.product_name}`,
-        name: p.name || p.product_name,
+        name: p.name || p.product_name || "",
         brand: p.brand || "",
         category: p.category,
         ingredients: p.ingredients,
@@ -813,7 +834,7 @@ export default function App() {
       ...scannedInMode.filter((p) => !curatedNames.has((p.name || "").toLowerCase())),
     ];
     if (!q) return combined;
-    return combined.filter((p) => p.name.toLowerCase().includes(q) || (p.brand || "").toLowerCase().includes(q));
+    return combined.filter((p) => (p.name || "").toLowerCase().includes(q) || (p.brand || "").toLowerCase().includes(q));
   }, [query, mode, recentScans]);
 
   const handleFile = async (file) => {
