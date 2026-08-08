@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Search, Leaf, FlaskConical, Flame, AlertTriangle, ChevronLeft, ScanLine, Info, Camera, Loader2, X, Image as ImageIcon, Sparkles } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Leaf, FlaskConical, Flame, AlertTriangle, ChevronLeft, ScanLine, Info, Camera, Loader2, X, Image as ImageIcon, Sparkles, Share2, Download } from "lucide-react";
 
 // ---------- Design tokens ----------
 const BG = "#0C1210";
@@ -252,14 +252,76 @@ function SafetyBadge({ item }) {
   );
 }
 
+function buildShareText(data) {
+  const { level, reasons } = analyzeSafety(data);
+  const label = { clean: "Looks clean", moderate: "Worth a closer look", high: "Several flags" }[level];
+  const name = data.name || data.product_name;
+  let text = `${name}${data.brand ? ` (${data.brand})` : ""}\n\nSafety: ${label}`;
+  if (reasons.length) text += `\n${reasons.map((r) => `• ${r}`).join("\n")}`;
+  if (data.ingredients) text += `\n\nIngredients: ${data.ingredients}`;
+  if (data.nutrition?.calories_kcal_per_100g != null) {
+    text += `\n\nCalories: ${data.nutrition.calories_kcal_per_100g} kcal/100g`;
+  }
+  text += `\n\n— checked on Insider`;
+  return text;
+}
+
+async function shareProduct(data, setToast) {
+  const text = buildShareText(data);
+  const title = data.name || data.product_name || "Insider";
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text });
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      setToast?.("Copied to clipboard");
+    }
+  } catch (err) {
+    // user cancelled the native share sheet — not an error worth surfacing
+    if (err?.name !== "AbortError") {
+      try {
+        await navigator.clipboard.writeText(text);
+        setToast?.("Copied to clipboard");
+      } catch {
+        // clipboard unavailable too — silently give up, nothing else we can do
+      }
+    }
+  }
+}
+
 function DetailCard({ data, sourceLabel }) {
   const chemicals = data.chemicals || [];
   const allergens = data.allergens || [];
   const nutrition = data.nutrition;
+  const [toast, setToast] = useState("");
+
+  const handleShare = async () => {
+    await shareProduct(data, setToast);
+    setTimeout(() => setToast(""), 2000);
+  };
+
   return (
-    <div className="rounded-3xl overflow-hidden" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+    <div className="rounded-3xl overflow-hidden relative" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+      {toast && (
+        <div
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-full body-f text-xs font-semibold animate-fade-in"
+          style={{ background: LIME, color: "#0C1210" }}
+        >
+          {toast}
+        </div>
+      )}
       <div className="p-5" style={{ borderBottom: `1px solid ${BORDER}` }}>
-        <h2 className="display text-2xl leading-tight" style={{ color: TEXT }}>{data.name || data.product_name}</h2>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="display text-2xl leading-tight" style={{ color: TEXT }}>{data.name || data.product_name}</h2>
+          <button
+            onClick={handleShare}
+            className="tap-scale shrink-0 w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}
+            aria-label="Share"
+          >
+            <Share2 size={15} color={TEXT} />
+          </button>
+        </div>
         {data.brand && <p className="body-f text-sm mt-1" style={{ color: MUTED }}>{data.brand}</p>}
         {sourceLabel && (
           <span
@@ -273,6 +335,7 @@ function DetailCard({ data, sourceLabel }) {
 
       <div className="p-5">
         <SafetyBadge item={data} />
+
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2.5">
@@ -370,6 +433,33 @@ export default function App() {
   const [mode, setMode] = useState("food");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
+
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const onPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    const onInstalled = () => {
+      setInstalled(true);
+      setInstallPrompt(null);
+    };
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
 
   const [imgPreview, setImgPreview] = useState(null);
   const [scanStatus, setScanStatus] = useState("idle"); // idle | loading | done | error
@@ -496,11 +586,22 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
           style={{ background: `radial-gradient(circle, ${LIME}22 0%, transparent 70%)` }}
         />
         <div className="relative">
-          <div className="flex items-center gap-2 mb-5">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
-            <span className="body-f text-[11px] tracking-[0.25em] uppercase" style={{ color: MUTED }}>
-              AI Label Scanner
-            </span>
+          <div className="flex items-center justify-between gap-2 mb-5">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
+              <span className="body-f text-[11px] tracking-[0.25em] uppercase" style={{ color: MUTED }}>
+                AI Label Scanner
+              </span>
+            </div>
+            {installPrompt && !installed && (
+              <button
+                onClick={handleInstall}
+                className="tap-scale flex items-center gap-1.5 px-3 py-1.5 rounded-full body-f text-xs font-semibold"
+                style={{ background: LIME, color: "#0C1210" }}
+              >
+                <Download size={13} /> Install app
+              </button>
+            )}
           </div>
           <h1 className="display text-[2.6rem] leading-[1.05]" style={{ color: TEXT }}>
             Know what's<br /><em style={{ color: LIME, fontStyle: "italic" }}>really</em> inside.
