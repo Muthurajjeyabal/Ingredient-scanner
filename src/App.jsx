@@ -821,10 +821,16 @@ export default function App() {
     setScanStatus("loading");
     setScanResult(null);
     setScanError("");
-    setImgPreview(URL.createObjectURL(file));
+    // Release the previous preview's memory before allocating a new one —
+    // otherwise repeated scans accumulate undecoded blob memory and the
+    // WebView eventually crashes to a blank white screen on a later scan.
+    setImgPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
 
     try {
-      const { base64, mediaType } = await compressImage(file);
+      const { base64, mediaType } = await compressImage(file, 1024, 0.7);
 
       const prompt = `This is a photo of the back-of-pack label for an Indian ${mode === "food" ? "food/grocery" : "personal-care/cosmetic"} product. Read the ingredients list, nutrition facts, and brand name visible in the image, then respond with ONLY a raw JSON object (no markdown fences, no commentary) in exactly this shape:
 {
@@ -873,13 +879,19 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
     setScanStatus("idle");
     setScanResult(null);
     setScanError("");
-    setImgPreview(null);
+    setImgPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
   };
 
   const openRecent = (item) => {
     setScanResult(item);
     setScanStatus("done");
-    setImgPreview(null);
+    setImgPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
   };
 
   return (
@@ -1124,7 +1136,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
 
             {(scanStatus === "loading" || scanStatus === "done" || scanStatus === "error") && imgPreview && (
               <div className="mb-4 relative rounded-2xl overflow-hidden animate-fade-in" style={{ border: `1px solid ${BORDER}` }}>
-                <img src={imgPreview} alt="scanned label" className="w-full max-h-56 object-cover" />
+                <img src={imgPreview} alt="scanned label" decoding="async" className="w-full max-h-56 object-cover" />
                 {scanStatus === "loading" && (
                   <div className="absolute inset-x-0 h-16 pointer-events-none scan-glow" style={{ background: `linear-gradient(to bottom, transparent, ${LIME}33, transparent)` }} />
                 )}
