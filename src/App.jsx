@@ -296,6 +296,97 @@ function formatReasons(flags, t) {
   });
 }
 
+function computeHealthInsights(item) {
+  const { level, flags } = analyzeSafety(item);
+  const chemicals = item.chemicals || [];
+  const allergens = item.allergens || [];
+  const n = item.nutrition;
+
+  const score = Math.max(10, 100 - flags.length * 18);
+
+  const sugarScore = n?.sugar_g != null ? Math.max(0, Math.round(100 - Math.min(100, n.sugar_g * 3))) : null;
+  const sodiumScore = n?.salt_g != null ? Math.max(0, Math.round(100 - Math.min(100, n.salt_g * 55))) : null;
+  const additivesScore = Math.max(0, Math.round(100 - chemicals.length * 20));
+
+  let processing = "procMinimal";
+  if (chemicals.length >= 5) processing = "procUltra";
+  else if (chemicals.length >= 3) processing = "procHigh";
+  else if (chemicals.length >= 1) processing = "procModerate";
+
+  const carefulKeys = [];
+  if (allergens.length > 0) carefulKeys.push("carefulAllergy");
+  if (flags.some((f) => f.type === "salt")) carefulKeys.push("carefulSodium");
+  if (flags.some((f) => f.type === "sugar")) carefulKeys.push("carefulSugar");
+  if (level !== "clean") carefulKeys.push("carefulChildren");
+
+  return { level, score, sugarScore, sodiumScore, additivesScore, processing, carefulKeys };
+}
+
+function ScoreBar({ label, value, color }) {
+  if (value == null) return null;
+  return (
+    <div className="mb-2">
+      <div className="flex items-center justify-between mb-1">
+        <span className="body-f text-xs" style={{ color: MUTED }}>{label}</span>
+        <span className="mono-f text-xs font-semibold" style={{ color: TEXT }}>{value}</span>
+      </div>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
+        <div className="h-full rounded-full" style={{ width: `${value}%`, background: color }} />
+      </div>
+    </div>
+  );
+}
+
+function HealthScoreCard({ item, t }) {
+  const { level, score, sugarScore, sodiumScore, additivesScore, processing, carefulKeys } = computeHealthInsights(item);
+  const color = { clean: LIME, moderate: AMBER, high: CORAL }[level];
+
+  return (
+    <div className="mb-6 rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
+      <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <div className="flex items-center justify-between mb-1">
+          <span className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.healthScore}</span>
+          <span className="mono-f text-2xl font-bold" style={{ color }}>{score}</span>
+        </div>
+        <ScoreBar label={t.sugar} value={sugarScore} color={LIME} />
+        <ScoreBar label={t.salt} value={sodiumScore} color={LIME} />
+        <ScoreBar label={t.additivesTitle} value={additivesScore} color={LIME} />
+      </div>
+
+      <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <p className="body-f text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{t.verdict}</p>
+        <p className="body-f text-sm" style={{ color: TEXT }}>
+          {level === "clean" ? t.safeCleanSub : level === "moderate" ? t.freqModerate : t.freqHigh}
+        </p>
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: LIME + "1a", color: LIME }}>{t.bestFor}</span>
+          {level !== "clean" && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: CORAL + "1a", color: CORAL }}>{t.notIdealFor}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="p-4" style={{ borderBottom: carefulKeys.length ? `1px solid ${BORDER}` : "none" }}>
+        <p className="body-f text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{t.processing}</p>
+        <p className="body-f text-sm" style={{ color: TEXT }}>{t[processing]}</p>
+      </div>
+
+      {carefulKeys.length > 0 && (
+        <div className="p-4">
+          <p className="body-f text-xs font-bold uppercase tracking-widest mb-2" style={{ color: MUTED }}>{t.careful}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {carefulKeys.map((k) => (
+              <span key={k} className="px-2.5 py-1 rounded-full text-[11px] font-medium" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
+                {t[k]}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ---------- Small UI pieces ----------
 function Chip({ children, tone = "line" }) {
   const styles = {
@@ -351,6 +442,13 @@ function SafetyBadge({ item, t }) {
           ))}
         </ul>
       )}
+      {(level === "moderate" || level === "high") && (
+        <div className="px-4 pb-3">
+          <p className="body-f text-xs font-medium" style={{ color: config.color }}>
+            {level === "moderate" ? t.freqModerate : t.freqHigh}
+          </p>
+        </div>
+      )}
       <p className="px-4 pb-3 body-f text-[10px]" style={{ color: MUTED }}>
         {t.safetyDisclaimer}
       </p>
@@ -365,6 +463,8 @@ function buildShareText(data, t) {
   const name = data.name || data.product_name;
   let text = `${name}${data.brand ? ` (${data.brand})` : ""}\n\n${label}`;
   if (reasons.length) text += `\n${reasons.map((r) => `• ${r}`).join("\n")}`;
+  if (level === "moderate") text += `\n${t.freqModerate}`;
+  if (level === "high") text += `\n${t.freqHigh}`;
   if (data.ingredients) text += `\n\n${t.ingredientsTitle}: ${data.ingredients}`;
   if (data.nutrition?.calories_kcal_per_100g != null) {
     text += `\n\n${t.calories}: ${data.nutrition.calories_kcal_per_100g} kcal/100g`;
@@ -494,7 +594,12 @@ function DetailCard({ data, sourceLabel, t }) {
       </div>
 
       <div className="p-5">
+        <HealthScoreCard item={data} t={t} />
         <SafetyBadge item={data} t={t} />
+
+        {sourceLabel && (
+          <p className="body-f text-[10px] mb-5 -mt-3" style={{ color: MUTED }}>{t.verifyNote}</p>
+        )}
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2.5">
@@ -658,21 +763,24 @@ export default function App() {
 
   const [recentScans, setRecentScans] = useState(() => {
     try {
-      const saved = localStorage.getItem("insider_recent_scans");
+      const saved = localStorage.getItem("insider_scanned_products");
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
 
+  // Every successful scan is kept permanently (no cap) and tagged with the
+  // mode it was scanned under, so it becomes searchable in Browse too —
+  // the app's own database grows from real scans over time.
   const saveToRecent = (item) => {
     setRecentScans((prev) => {
       const withoutDupe = prev.filter(
         (p) => (p.name || p.product_name) !== (item.name || item.product_name)
       );
-      const next = [{ ...item, _scannedAt: Date.now() }, ...withoutDupe].slice(0, 10);
+      const next = [{ ...item, category: mode, _scannedAt: Date.now() }, ...withoutDupe];
       try {
-        localStorage.setItem("insider_recent_scans", JSON.stringify(next));
+        localStorage.setItem("insider_scanned_products", JSON.stringify(next));
       } catch {
         // storage full or unavailable — non-critical, skip
       }
@@ -682,10 +790,28 @@ export default function App() {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const inMode = DB.filter((p) => p.category === mode);
-    if (!q) return inMode;
-    return inMode.filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
-  }, [query, mode]);
+    const scannedInMode = recentScans
+      .filter((p) => (p.category || "food") === mode)
+      .map((p) => ({
+        id: `scanned-${p.name || p.product_name}`,
+        name: p.name || p.product_name,
+        brand: p.brand || "",
+        category: p.category,
+        ingredients: p.ingredients,
+        chemicals: p.chemicals,
+        allergens: p.allergens,
+        nutrition: p.nutrition,
+        _scanned: true,
+      }));
+    // Curated entries take priority; scanned ones fill in anything not already covered.
+    const curatedNames = new Set(DB.filter((p) => p.category === mode).map((p) => p.name.toLowerCase()));
+    const combined = [
+      ...DB.filter((p) => p.category === mode),
+      ...scannedInMode.filter((p) => !curatedNames.has((p.name || "").toLowerCase())),
+    ];
+    if (!q) return combined;
+    return combined.filter((p) => p.name.toLowerCase().includes(q) || (p.brand || "").toLowerCase().includes(q));
+  }, [query, mode, recentScans]);
 
   const handleFile = async (file) => {
     if (!file) return;
@@ -969,7 +1095,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                   <div className="mt-7 animate-fade-in">
                     <p className="body-f text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: MUTED }}>{t.recentScansTitle}</p>
                     <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
-                      {recentScans.map((item, i) => {
+                      {recentScans.slice(0, 10).map((item, i) => {
                         const { level } = analyzeSafety(item);
                         const dot = { clean: LIME, moderate: AMBER, high: CORAL }[level];
                         return (
