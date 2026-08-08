@@ -376,6 +376,30 @@ export default function App() {
   const [scanResult, setScanResult] = useState(null);
   const [scanError, setScanError] = useState("");
 
+  const [recentScans, setRecentScans] = useState(() => {
+    try {
+      const saved = localStorage.getItem("insider_recent_scans");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const saveToRecent = (item) => {
+    setRecentScans((prev) => {
+      const withoutDupe = prev.filter(
+        (p) => (p.name || p.product_name) !== (item.name || item.product_name)
+      );
+      const next = [{ ...item, _scannedAt: Date.now() }, ...withoutDupe].slice(0, 10);
+      try {
+        localStorage.setItem("insider_recent_scans", JSON.stringify(next));
+      } catch {
+        // storage full or unavailable — non-critical, skip
+      }
+      return next;
+    });
+  };
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     const inMode = DB.filter((p) => p.category === mode);
@@ -427,6 +451,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
       }
       setScanResult(parsed);
       setScanStatus("done");
+      saveToRecent(parsed);
     } catch (err) {
       const msg = err.message || String(err);
       setScanError(msg.includes("Failed to fetch") ? "Network issue — check your connection and try again" : msg);
@@ -441,6 +466,12 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
     setImgPreview(null);
   };
 
+  const openRecent = (item) => {
+    setScanResult(item);
+    setScanStatus("done");
+    setImgPreview(null);
+  };
+
   return (
     <div className="min-h-screen w-full" style={{ background: BG }}>
       <style>{`
@@ -452,6 +483,10 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
         .scan-glow { animation: scanmove 2.2s ease-in-out infinite; }
         .tap-scale { transition: transform .15s ease, border-color .15s ease, background .15s ease; }
         .tap-scale:active { transform: scale(0.98); }
+        @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadein .35s ease both; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .shimmer { background: linear-gradient(90deg, ${SURFACE_2} 25%, #2A342D 50%, ${SURFACE_2} 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
       `}</style>
 
       {/* Header */}
@@ -526,7 +561,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
       </header>
 
       {/* Body */}
-      <main className="px-5 pb-8 max-w-2xl mx-auto">
+      <main key={view + (selected ? "-detail" : "")} className="px-5 pb-8 max-w-2xl mx-auto animate-fade-in">
         {view === "browse" && !selected && (
           <>
             {results.length === 0 && (
@@ -536,15 +571,15 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
               </div>
             )}
             <div className="grid gap-2.5">
-              {results.map((p) => {
+              {results.map((p, i) => {
                 const { level } = analyzeSafety(p);
                 const dot = { clean: LIME, moderate: AMBER, high: CORAL }[level];
                 return (
                   <button
                     key={p.id}
                     onClick={() => setSelected(p)}
-                    className="tap-scale text-left flex items-center gap-3 p-3.5 rounded-2xl"
-                    style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
+                    className="tap-scale text-left flex items-center gap-3 p-3.5 rounded-2xl animate-fade-in"
+                    style={{ background: SURFACE, border: `1px solid ${BORDER}`, animationDelay: `${Math.min(i, 8) * 30}ms` }}
                   >
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 relative" style={{ background: SURFACE_2 }}>
                       {p.category === "food" ? <Flame size={17} color={MUTED} /> : <FlaskConical size={17} color={MUTED} />}
@@ -605,11 +640,37 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                 <p className="body-f text-xs mt-4 text-center" style={{ color: MUTED }}>
                   Good lighting and a close, sharp shot of the ingredients list works best.
                 </p>
+
+                {recentScans.length > 0 && (
+                  <div className="mt-7 animate-fade-in">
+                    <p className="body-f text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: MUTED }}>Recent scans</p>
+                    <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
+                      {recentScans.map((item, i) => {
+                        const { level } = analyzeSafety(item);
+                        const dot = { clean: LIME, moderate: AMBER, high: CORAL }[level];
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => openRecent(item)}
+                            className="tap-scale shrink-0 text-left px-3.5 py-3 rounded-2xl"
+                            style={{ background: SURFACE, border: `1px solid ${BORDER}`, minWidth: 148, maxWidth: 168 }}
+                          >
+                            <span className="w-2 h-2 rounded-full inline-block mb-2" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
+                            <p className="body-f text-xs font-semibold leading-snug truncate" style={{ color: TEXT }}>
+                              {item.name || item.product_name}
+                            </p>
+                            {item.brand && <p className="body-f text-[10px] mt-0.5 truncate" style={{ color: MUTED }}>{item.brand}</p>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {(scanStatus === "loading" || scanStatus === "done" || scanStatus === "error") && imgPreview && (
-              <div className="mb-4 relative rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+              <div className="mb-4 relative rounded-2xl overflow-hidden animate-fade-in" style={{ border: `1px solid ${BORDER}` }}>
                 <img src={imgPreview} alt="scanned label" className="w-full max-h-56 object-cover" />
                 {scanStatus === "loading" && (
                   <div className="absolute inset-x-0 h-16 pointer-events-none scan-glow" style={{ background: `linear-gradient(to bottom, transparent, ${LIME}33, transparent)` }} />
@@ -621,9 +682,19 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             )}
 
             {scanStatus === "loading" && (
-              <div className="flex flex-col items-center py-8 body-f" style={{ color: TEXT }}>
-                <Loader2 className="animate-spin mb-2" color={LIME} />
-                <p className="text-sm" style={{ color: MUTED }}>Reading the label…</p>
+              <div className="animate-fade-in">
+                <div className="flex items-center gap-2 justify-center py-4 body-f" style={{ color: MUTED }}>
+                  <Loader2 className="animate-spin" size={15} color={LIME} />
+                  <p className="text-sm">Reading the label…</p>
+                </div>
+                <div className="rounded-3xl overflow-hidden p-5" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+                  <div className="shimmer h-5 w-2/3 rounded-lg mb-2.5" />
+                  <div className="shimmer h-3 w-1/3 rounded-lg mb-6" />
+                  <div className="shimmer h-16 w-full rounded-2xl mb-5" />
+                  <div className="shimmer h-3 w-full rounded-lg mb-2" />
+                  <div className="shimmer h-3 w-5/6 rounded-lg mb-2" />
+                  <div className="shimmer h-3 w-4/6 rounded-lg" />
+                </div>
               </div>
             )}
 
@@ -640,7 +711,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             )}
 
             {scanStatus === "done" && scanResult && (
-              <div>
+              <div className="animate-fade-in">
                 <DetailCard data={scanResult} sourceLabel="Scanned" />
                 <button onClick={resetScan} className="tap-scale body-f mt-4 w-full py-3 rounded-2xl text-sm font-semibold" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
                   Scan another product
