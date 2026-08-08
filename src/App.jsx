@@ -1,12 +1,16 @@
-import { useState, useMemo, useRef } from "react";
-import { Search, Leaf, FlaskConical, Flame, AlertTriangle, ChevronLeft, PackageSearch, Info, Camera, Loader2, X, ScanLine } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Leaf, FlaskConical, Flame, AlertTriangle, ChevronLeft, ScanLine, Info, Camera, Loader2, X, Image as ImageIcon, Sparkles } from "lucide-react";
 
-const INK = "#20291B";
-const PAPER = "#F5F0E3";
-const TURMERIC = "#DE9F2E";
-const CHILI = "#B8402A";
-const CURRY = "#4C6B3C";
-const CARD = "#FFFCF4";
+// ---------- Design tokens ----------
+const BG = "#0C1210";
+const SURFACE = "#161D19";
+const SURFACE_2 = "#1E2621";
+const BORDER = "#2A342D";
+const LIME = "#C6FF4D";
+const CORAL = "#FF6152";
+const AMBER = "#FFB648";
+const TEXT = "#F3F6F1";
+const MUTED = "#8B9A8E";
 
 const DB = [
   { id: "parle-g", name: "Parle-G Original Glucose Biscuits", brand: "Parle Products", category: "food",
@@ -75,7 +79,6 @@ const DB = [
     chemicals: ["E330 - Citric acid", "E319 - TBHQ (antioxidant)"],
     allergens: ["May contain traces of milk, nuts, and wheat"],
     nutrition: { calories_kcal_per_100g: 545, protein_g: 12, fat_g: 36, sugar_g: 2, carbs_g: 45, salt_g: 2.3 } },
-
   { id: "sunfeast-dark-fantasy", name: "Sunfeast Dark Fantasy Choco Fills", brand: "ITC", category: "food",
     ingredients: "Refined wheat flour, sugar, chocolate cream filling (25%), edible vegetable oil (palm oil), cocoa solids, invert syrup, raising agents (E500(ii), E503(ii)), emulsifiers (E322, E471), salt, artificial flavour.",
     chemicals: ["E500(ii) - Sodium bicarbonate", "E503(ii) - Ammonium bicarbonate", "E322 - Lecithin", "E471 - Mono/diglycerides"],
@@ -121,12 +124,11 @@ const DB = [
     chemicals: ["E150d - Caramel colour", "E338 - Phosphoric acid", "Caffeine"],
     allergens: [],
     nutrition: { calories_kcal_per_100g: 44, protein_g: 0, fat_g: 0, sugar_g: 11, carbs_g: 11, salt_g: 0 } },
-
   { id: "nivea-cream", name: "Nivea Soft Light Moisturiser", brand: "Beiersdorf", category: "cosmetic",
     ingredients: "Aqua, glycerin, paraffinum liquidum, dicaprylyl carbonate, cetearyl alcohol, glyceryl stearate citrate, alcohol denat., butylene glycol, dimethicone, jojoba oil, vitamin E acetate, fragrance, carbomer, sodium hydroxide, disodium EDTA.",
     chemicals: ["Dimethicone - silicone emollient", "Disodium EDTA - preservative/chelator", "Paraffinum liquidum - mineral oil"],
     allergens: ["Fragrance (parfum)"], nutrition: null },
-  { id: "fair-and-lovely", name: "Glow & Lovely (formerly Fair & Lovely) Cream", brand: "Unilever", category: "cosmetic",
+  { id: "fair-and-lovely", name: "Glow & Lovely Cream", brand: "Unilever", category: "cosmetic",
     ingredients: "Water, niacinamide, glycerin, mineral oil, stearic acid, glyceryl stearate, titanium dioxide (CI 77891), allantoin, sodium PCA, fragrance, tocopheryl acetate (vitamin E), phenoxyethanol.",
     chemicals: ["Phenoxyethanol - preservative", "Titanium dioxide", "Niacinamide - vitamin B3"],
     allergens: ["Fragrance (parfum)"], nutrition: null },
@@ -152,19 +154,100 @@ const DB = [
     allergens: ["Fragrance (parfum)"], nutrition: null },
 ];
 
-function Chip({ children, tone = "curry" }) {
-  const bg = tone === "curry" ? CURRY : tone === "chili" ? CHILI : TURMERIC;
-  return <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide mr-1.5 mb-1.5" style={{ background: bg, color: PAPER }}>{children}</span>;
+// ---------- Safety heuristic ----------
+const FLAGGED_ADDITIVES = [
+  { kw: "sodium lauryl sulfate", note: "SLS — can dry out skin/scalp for some users" },
+  { kw: "sodium laureth sulfate", note: "SLES — mild irritant for sensitive skin" },
+  { kw: "paraben", note: "Paraben — debated link to hormone disruption" },
+  { kw: "tbhq", note: "TBHQ — regular high intake isn't advised" },
+  { kw: "monosodium glutamate", note: "MSG — may trigger headaches/sensitivity in some" },
+  { kw: " msg", note: "MSG — may trigger headaches/sensitivity in some" },
+  { kw: "hydrogenated", note: "Hydrogenated / trans fat — linked to heart health risk" },
+  { kw: "phosphoric acid", note: "Phosphoric acid — frequent high intake may affect bone health" },
+  { kw: "chloroxylenol", note: "Chloroxylenol — strong antibacterial, avoid prolonged skin contact" },
+  { kw: "ci 14700", note: "Synthetic dye" },
+  { kw: "ci 15985", note: "Synthetic dye" },
+  { kw: "ci 16035", note: "Synthetic dye" },
+  { kw: "ci 19140", note: "Synthetic dye — some studies link to hyperactivity" },
+  { kw: "ci 42090", note: "Synthetic dye" },
+  { kw: "ci 74160", note: "Synthetic dye" },
+  { kw: "e150d", note: "Caramel colour (E150d) — flagged in some studies" },
+  { kw: "e319", note: "TBHQ (E319) — regular high intake isn't advised" },
+];
+
+function analyzeSafety(item) {
+  const haystack = `${item.ingredients || ""} ${(item.chemicals || []).join(" ")}`.toLowerCase();
+  const reasons = [];
+  for (const f of FLAGGED_ADDITIVES) {
+    if (haystack.includes(f.kw) && !reasons.includes(f.note)) reasons.push(f.note);
+  }
+  const n = item.nutrition;
+  if (n?.sugar_g != null && n.sugar_g > 22) reasons.push(`High sugar (${n.sugar_g}g/100g)`);
+  if (n?.salt_g != null && n.salt_g > 1.5) reasons.push(`High salt (${n.salt_g}g/100g)`);
+
+  let level = "clean";
+  if (reasons.length >= 3) level = "high";
+  else if (reasons.length >= 1) level = "moderate";
+  return { level, reasons };
+}
+
+// ---------- Small UI pieces ----------
+function Chip({ children, tone = "line" }) {
+  const styles = {
+    line: { background: "transparent", border: `1px solid ${BORDER}`, color: TEXT },
+    coral: { background: CORAL + "1f", border: `1px solid ${CORAL}55`, color: "#FFD3CC" },
+    amber: { background: AMBER + "1f", border: `1px solid ${AMBER}55`, color: "#FFE3B0" },
+  }[tone];
+  return (
+    <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-medium tracking-wide mr-1.5 mb-1.5" style={styles}>
+      {children}
+    </span>
+  );
 }
 
 function Nutrient({ label, value, unit }) {
   if (value === undefined || value === null) return null;
   return (
-    <div className="flex items-baseline justify-between border-b py-2" style={{ borderColor: "#DED4B8" }}>
-      <span className="text-sm" style={{ color: INK, opacity: 0.75 }}>{label}</span>
-      <span className="font-mono text-sm font-semibold" style={{ color: INK }}>
-        {value}{unit ? <span className="opacity-60 ml-1">{unit}</span> : null}
+    <div className="flex items-baseline justify-between py-2.5" style={{ borderBottom: `1px solid ${BORDER}` }}>
+      <span className="text-sm" style={{ color: MUTED }}>{label}</span>
+      <span className="mono-f text-sm font-semibold" style={{ color: TEXT }}>
+        {value}{unit ? <span style={{ color: MUTED }} className="ml-1">{unit}</span> : null}
       </span>
+    </div>
+  );
+}
+
+function SafetyBadge({ item }) {
+  const { level, reasons } = analyzeSafety(item);
+  const config = {
+    clean: { color: LIME, label: "Looks clean", sub: "No flagged additives found" },
+    moderate: { color: AMBER, label: "Worth a closer look", sub: `${reasons.length} thing${reasons.length > 1 ? "s" : ""} to know` },
+    high: { color: CORAL, label: "Several flags", sub: `${reasons.length} things to know` },
+  }[level];
+  return (
+    <div
+      className="mb-5 rounded-2xl overflow-hidden"
+      style={{ background: SURFACE_2, border: `1px solid ${config.color}40` }}
+    >
+      <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: reasons.length ? `1px solid ${BORDER}` : "none" }}>
+        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: config.color, boxShadow: `0 0 12px ${config.color}` }} />
+        <div className="min-w-0">
+          <p className="body-f text-sm font-semibold" style={{ color: TEXT }}>{config.label}</p>
+          <p className="body-f text-xs" style={{ color: MUTED }}>{config.sub}</p>
+        </div>
+      </div>
+      {reasons.length > 0 && (
+        <ul className="px-4 py-3 space-y-1.5">
+          {reasons.map((r, i) => (
+            <li key={i} className="body-f text-xs flex items-start gap-2" style={{ color: TEXT, opacity: 0.85 }}>
+              <span style={{ color: config.color }} className="mt-0.5">·</span>{r}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="px-4 pb-3 body-f text-[10px]" style={{ color: MUTED }}>
+        General consumer-awareness info, not medical advice.
+      </p>
     </div>
   );
 }
@@ -174,62 +257,66 @@ function DetailCard({ data, sourceLabel }) {
   const allergens = data.allergens || [];
   const nutrition = data.nutrition;
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid #E3D9BB` }}>
-      <div className="p-4" style={{ borderBottom: "1px solid #E3D9BB" }}>
-        <div className="flex items-center justify-between">
-          <h2 className="display text-xl leading-tight" style={{ color: INK }}>{data.name || data.product_name}</h2>
-        </div>
-        {(data.brand) && <p className="body-f text-xs mt-1" style={{ color: INK, opacity: 0.55 }}>{data.brand}</p>}
+    <div className="rounded-3xl overflow-hidden" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+      <div className="p-5" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <h2 className="display text-2xl leading-tight" style={{ color: TEXT }}>{data.name || data.product_name}</h2>
+        {data.brand && <p className="body-f text-sm mt-1" style={{ color: MUTED }}>{data.brand}</p>}
         {sourceLabel && (
-          <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase mono-f" style={{ background: TURMERIC, color: INK }}>
-            {sourceLabel}
+          <span
+            className="inline-flex items-center gap-1 mt-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mono-f"
+            style={{ background: LIME + "1a", color: LIME, border: `1px solid ${LIME}40` }}
+          >
+            <Sparkles size={11} />{sourceLabel}
           </span>
         )}
       </div>
-      <div className="p-4">
-        <div className="mb-5">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Leaf size={15} color={CURRY} />
-            <h3 className="body-f text-sm font-bold uppercase tracking-wide" style={{ color: CURRY }}>சேர்க்கைப் பொருட்கள்</h3>
+
+      <div className="p-5">
+        <SafetyBadge item={data} />
+
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2.5">
+            <Leaf size={15} color={LIME} />
+            <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Ingredients</h3>
           </div>
-          <p className="body-f text-sm leading-relaxed" style={{ color: INK, opacity: 0.85 }}>
-            {data.ingredients || "Label-ல ingredients தெளிவா தெரியல."}
+          <p className="body-f text-[15px] leading-relaxed" style={{ color: TEXT, opacity: 0.9 }}>
+            {data.ingredients || "Ingredients not available."}
           </p>
         </div>
 
         {chemicals.length > 0 && (
-          <div className="mb-5">
-            <div className="flex items-center gap-1.5 mb-2">
-              <FlaskConical size={15} color={CHILI} />
-              <h3 className="body-f text-sm font-bold uppercase tracking-wide" style={{ color: CHILI }}>Additives / கெமிக்கல்ஸ்</h3>
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2.5">
+              <FlaskConical size={15} color={CORAL} />
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Additives &amp; chemicals</h3>
             </div>
-            <div className="flex flex-wrap">{chemicals.map((a, i) => <Chip key={i} tone="chili">{a}</Chip>)}</div>
+            <div className="flex flex-wrap">{chemicals.map((a, i) => <Chip key={i} tone="coral">{a}</Chip>)}</div>
           </div>
         )}
 
         {allergens.length > 0 && (
-          <div className="mb-5">
-            <div className="flex items-center gap-1.5 mb-2">
-              <AlertTriangle size={15} color={TURMERIC} />
-              <h3 className="body-f text-sm font-bold uppercase tracking-wide" style={{ color: "#946A17" }}>அலர்ஜி எச்சரிக்கை</h3>
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2.5">
+              <AlertTriangle size={15} color={AMBER} />
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Allergen warnings</h3>
             </div>
-            <div className="flex flex-wrap">{allergens.map((a, i) => <Chip key={i} tone="turmeric">{a}</Chip>)}</div>
+            <div className="flex flex-wrap">{allergens.map((a, i) => <Chip key={i} tone="amber">{a}</Chip>)}</div>
           </div>
         )}
 
         {nutrition && (
           <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Flame size={15} color={CHILI} />
-              <h3 className="body-f text-sm font-bold uppercase tracking-wide" style={{ color: CHILI }}>ஊட்டச்சத்து (100g-க்கு)</h3>
+            <div className="flex items-center gap-2 mb-2.5">
+              <Flame size={15} color={CORAL} />
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Nutrition — per 100g</h3>
             </div>
             <div>
-              <Nutrient label="கலோரி" value={nutrition.calories_kcal_per_100g} unit="kcal" />
-              <Nutrient label="புரதம்" value={nutrition.protein_g} unit="g" />
-              <Nutrient label="கொழுப்பு" value={nutrition.fat_g} unit="g" />
-              <Nutrient label="சர்க்கரை" value={nutrition.sugar_g} unit="g" />
-              <Nutrient label="கார்போஹைட்ரேட்" value={nutrition.carbs_g} unit="g" />
-              <Nutrient label="உப்பு" value={nutrition.salt_g} unit="g" />
+              <Nutrient label="Calories" value={nutrition.calories_kcal_per_100g} unit="kcal" />
+              <Nutrient label="Protein" value={nutrition.protein_g} unit="g" />
+              <Nutrient label="Fat" value={nutrition.fat_g} unit="g" />
+              <Nutrient label="Sugar" value={nutrition.sugar_g} unit="g" />
+              <Nutrient label="Carbohydrate" value={nutrition.carbs_g} unit="g" />
+              <Nutrient label="Salt" value={nutrition.salt_g} unit="g" />
             </div>
           </div>
         )}
@@ -238,18 +325,7 @@ function DetailCard({ data, sourceLabel }) {
   );
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result.split(",")[1]);
-    r.onerror = () => reject(new Error("read_failed"));
-    r.readAsDataURL(file);
-  });
-}
-
-// Resizes/compresses a photo client-side before upload, so large phone-camera
-// photos (often several MB) don't exceed the serverless function's request
-// size limit and cause the request to fail outright.
+// ---------- Image + AI helpers ----------
 function compressImage(file, maxDimension = 1280, quality = 0.75) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -284,10 +360,11 @@ function extractJson(text) {
   const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error("AI பதிலில் JSON கிடைக்கல்: " + text.slice(0, 150));
+  if (start === -1 || end === -1) throw new Error("Couldn't find JSON in the AI response: " + text.slice(0, 150));
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+// ---------- App ----------
 export default function App() {
   const [view, setView] = useState("browse"); // browse | scan
   const [mode, setMode] = useState("food");
@@ -316,37 +393,31 @@ export default function App() {
     try {
       const { base64, mediaType } = await compressImage(file);
 
-      const prompt = `இது ஒரு இந்திய தயாரிப்பின் (உணவு அல்லது cosmetic) packet/label புகைப்படம். இதில் தெரியும் ingredients list, nutrition facts, brand பெயரை படித்து, கீழ்க்கண்ட shape-ல மட்டும் raw JSON கொடு (markdown fence வேண்டாம், commentary வேண்டாம்):
+      const prompt = `This is a photo of the back-of-pack label for an Indian ${mode === "food" ? "food/grocery" : "personal-care/cosmetic"} product. Read the ingredients list, nutrition facts, and brand name visible in the image, then respond with ONLY a raw JSON object (no markdown fences, no commentary) in exactly this shape:
 {
   "name": string,
   "brand": string,
   "ingredients": string,
   "chemicals": string[],
   "allergens": string[],
-  "nutrition": { "calories_kcal_per_100g": number|null, "protein_g": number|null, "fat_g": number|null, "sugar_g": number|null, "carbs_g": number|null, "salt_g": number|null } | null
+  "nutrition": ${mode === "food" ? `{ "calories_kcal_per_100g": number|null, "protein_g": number|null, "fat_g": number|null, "sugar_g": number|null, "carbs_g": number|null, "salt_g": number|null }` : "null"}
 }
-படத்தில் label தெளிவா தெரியலைனா: {"error": "படம் தெளிவா இல்ல, மறுபடியும் அருகில் இருந்து புகைப்படம் எடு"}`;
+If the label truly isn't readable, respond with only: {"error": "Couldn't read the label clearly — try a closer, well-lit photo"}`;
 
-      // Calls our own backend route (api/scan.js) instead of Anthropic directly,
-      // so the API key stays secret on the server and never reaches the browser.
       const response = await fetch("/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mediaType,
-          base64,
-          prompt,
-        }),
+        body: JSON.stringify({ mediaType, base64, prompt }),
       });
 
       if (!response.ok) {
         const t = await response.text();
-        throw new Error(`API பிழை ${response.status}: ${t.slice(0, 200)}`);
+        throw new Error(`API error ${response.status}: ${t.slice(0, 200)}`);
       }
 
       const data = await response.json();
       const textOut = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
-      if (!textOut) throw new Error("AI-யிடம் இருந்து பதில் காலியா வந்துச்சு");
+      if (!textOut) throw new Error("Empty response from AI");
 
       const parsed = extractJson(textOut);
       if (parsed.error) {
@@ -358,11 +429,7 @@ export default function App() {
       setScanStatus("done");
     } catch (err) {
       const msg = err.message || String(err);
-      setScanError(
-        msg.includes("Failed to fetch")
-          ? "Network பிரச்சனை — இணையம் சரியா இருக்கான்னு பாத்து மறுபடியும் முயற்சி பண்ணுங்க"
-          : msg
-      );
+      setScanError(msg.includes("Failed to fetch") ? "Network issue — check your connection and try again" : msg);
       setScanStatus("error");
     }
   };
@@ -375,95 +442,135 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ background: PAPER, fontFamily: "'Georgia', serif" }}>
+    <div className="min-h-screen w-full" style={{ background: BG }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
         .display { font-family: 'Fraunces', serif; }
         .body-f { font-family: 'Inter', sans-serif; }
         .mono-f { font-family: 'JetBrains Mono', monospace; }
+        @keyframes scanmove { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        .scan-glow { animation: scanmove 2.2s ease-in-out infinite; }
+        .tap-scale { transition: transform .15s ease, border-color .15s ease, background .15s ease; }
+        .tap-scale:active { transform: scale(0.98); }
       `}</style>
 
-      <header className="px-5 pt-6 pb-5" style={{ background: INK }}>
-        <div className="flex items-center gap-2 mb-4">
-          <PackageSearch size={20} color={TURMERIC} />
-          <span className="body-f text-xs tracking-[0.2em] uppercase" style={{ color: TURMERIC }}>லேபிள் திறந்து பாருங்க</span>
-        </div>
-        <h1 className="display text-3xl leading-tight" style={{ color: PAPER }}>என்ன சேர்த்திருக்காங்க?</h1>
+      {/* Header */}
+      <header className="relative px-5 pt-8 pb-7 overflow-hidden">
+        <div
+          className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full"
+          style={{ background: `radial-gradient(circle, ${LIME}22 0%, transparent 70%)` }}
+        />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
+            <span className="body-f text-[11px] tracking-[0.25em] uppercase" style={{ color: MUTED }}>
+              AI Label Scanner
+            </span>
+          </div>
+          <h1 className="display text-[2.6rem] leading-[1.05]" style={{ color: TEXT }}>
+            Know what's<br /><em style={{ color: LIME, fontStyle: "italic" }}>really</em> inside.
+          </h1>
+          <p className="body-f text-sm mt-3" style={{ color: MUTED }}>
+            Food, toothpaste, soap — scan any label to see the ingredients, chemicals and nutrition behind it.
+          </p>
 
-        {/* view toggle */}
-        <div className="flex gap-2 mt-5">
-          <button
-            onClick={() => { setView("browse"); resetScan(); }}
-            className="body-f flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold flex-1 justify-center"
-            style={{ background: view === "browse" ? TURMERIC : "transparent", color: view === "browse" ? INK : PAPER, border: `1px solid ${view === "browse" ? TURMERIC : "#4A5640"}` }}
-          >
-            <Search size={14} /> பட்டியலில் தேடு
-          </button>
-          <button
-            onClick={() => setView("scan")}
-            className="body-f flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold flex-1 justify-center"
-            style={{ background: view === "scan" ? CHILI : "transparent", color: PAPER, border: `1px solid ${view === "scan" ? CHILI : "#4A5640"}` }}
-          >
-            <ScanLine size={14} /> லேபிள் ஸ்கேன்
-          </button>
-        </div>
+          {/* Browse / Scan segmented control */}
+          <div className="flex gap-2 mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+            <button
+              onClick={() => { setView("browse"); resetScan(); }}
+              className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ background: view === "browse" ? LIME : "transparent", color: view === "browse" ? "#0C1210" : MUTED }}
+            >
+              <Search size={14} /> Browse
+            </button>
+            <button
+              onClick={() => setView("scan")}
+              className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ background: view === "scan" ? LIME : "transparent", color: view === "scan" ? "#0C1210" : MUTED }}
+            >
+              <ScanLine size={14} /> Scan
+            </button>
+          </div>
 
-        {view === "browse" && (
-          <>
-            <div className="flex gap-2 mt-4">
-              {[{ id: "food", label: "உணவு பொருள்", icon: Flame }, { id: "cosmetic", label: "சோப் / பேஸ்ட்", icon: FlaskConical }].map(({ id, label, icon: Icon }) => (
-                <button key={id} onClick={() => { setMode(id); setSelected(null); setQuery(""); }}
-                  className="body-f flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                  style={{ background: mode === id ? TURMERIC : "transparent", color: mode === id ? INK : PAPER, border: `1px solid ${mode === id ? TURMERIC : "#4A5640"}` }}>
-                  <Icon size={14} />{label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center gap-2 px-3 py-2.5 rounded-lg" style={{ background: PAPER }}>
-              <Search size={16} color={INK} opacity={0.5} />
-              <input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
-                placeholder={mode === "food" ? "Parle-G, Maggi, Lay's..." : "Colgate, Dove, Lifebuoy..."}
-                className="body-f flex-1 bg-transparent outline-none text-sm" style={{ color: INK }} />
-            </div>
-          </>
-        )}
+          {view === "browse" && (
+            <>
+              <div className="flex gap-2 mt-4">
+                {[{ id: "food", label: "Food" }, { id: "cosmetic", label: "Personal care" }].map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => { setMode(id); setSelected(null); setQuery(""); }}
+                    className="tap-scale px-3.5 py-1.5 rounded-full text-xs font-semibold body-f"
+                    style={{
+                      background: mode === id ? SURFACE_2 : "transparent",
+                      color: mode === id ? TEXT : MUTED,
+                      border: `1px solid ${mode === id ? LIME + "50" : BORDER}`,
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center gap-2.5 px-4 py-3 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+                <Search size={16} color={MUTED} />
+                <input
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
+                  placeholder={mode === "food" ? "Parle-G, Maggi, Lay's…" : "Colgate, Dove, Lifebuoy…"}
+                  className="body-f flex-1 bg-transparent outline-none text-sm"
+                  style={{ color: TEXT }}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </header>
 
-      <main className="px-5 py-5 max-w-2xl mx-auto">
+      {/* Body */}
+      <main className="px-5 pb-8 max-w-2xl mx-auto">
         {view === "browse" && !selected && (
           <>
             {results.length === 0 && (
-              <div className="text-center py-10 body-f" style={{ color: INK, opacity: 0.6 }}>
-                <p className="text-sm">இந்த பெயருக்கு தற்போதைக்கு பட்டியலில் தகவல் இல்ல.</p>
-                <p className="text-xs mt-1 opacity-70">"லேபிள் ஸ்கேன்" tab-க்கு போய் பேக்கெட் புகைப்படம் எடுத்து பாருங்க.</p>
+              <div className="text-center py-12 body-f" style={{ color: MUTED }}>
+                <p className="text-sm">No match in the curated list yet.</p>
+                <p className="text-xs mt-1">Try the Scan tab to read any product's label directly.</p>
               </div>
             )}
-            <div className="grid gap-3">
-              {results.map((p) => (
-                <button key={p.id} onClick={() => setSelected(p)} className="text-left flex items-center gap-3 p-3 rounded-xl transition-transform hover:scale-[1.01]" style={{ background: CARD, border: "1px solid #E3D9BB" }}>
-                  <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0" style={{ background: PAPER }}>
-                    {p.category === "food" ? <Flame size={18} color={CHILI} /> : <FlaskConical size={18} color={CURRY} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="display text-base leading-tight truncate" style={{ color: INK }}>{p.name}</p>
-                    <p className="body-f text-xs mt-0.5 truncate" style={{ color: INK, opacity: 0.55 }}>{p.brand}</p>
-                  </div>
-                  {p.nutrition?.calories_kcal_per_100g && (
-                    <div className="text-right shrink-0">
-                      <p className="mono-f text-sm font-bold" style={{ color: CHILI }}>{p.nutrition.calories_kcal_per_100g}</p>
-                      <p className="body-f text-[10px] opacity-50">kcal/100g</p>
+            <div className="grid gap-2.5">
+              {results.map((p) => {
+                const { level } = analyzeSafety(p);
+                const dot = { clean: LIME, moderate: AMBER, high: CORAL }[level];
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelected(p)}
+                    className="tap-scale text-left flex items-center gap-3 p-3.5 rounded-2xl"
+                    style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
+                  >
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 relative" style={{ background: SURFACE_2 }}>
+                      {p.category === "food" ? <Flame size={17} color={MUTED} /> : <FlaskConical size={17} color={MUTED} />}
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
                     </div>
-                  )}
-                </button>
-              ))}
+                    <div className="flex-1 min-w-0">
+                      <p className="body-f text-sm font-semibold leading-tight truncate" style={{ color: TEXT }}>{p.name}</p>
+                      <p className="body-f text-xs mt-0.5 truncate" style={{ color: MUTED }}>{p.brand}</p>
+                    </div>
+                    {p.nutrition?.calories_kcal_per_100g != null && (
+                      <div className="text-right shrink-0">
+                        <p className="mono-f text-sm font-bold" style={{ color: TEXT }}>{p.nutrition.calories_kcal_per_100g}</p>
+                        <p className="body-f text-[10px]" style={{ color: MUTED }}>kcal/100g</p>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </>
         )}
 
         {view === "browse" && selected && (
           <div>
-            <button onClick={() => setSelected(null)} className="body-f flex items-center gap-1 text-xs font-semibold mb-4" style={{ color: INK, opacity: 0.6 }}>
-              <ChevronLeft size={14} /> பட்டியலுக்கு திரும்பு
+            <button onClick={() => setSelected(null)} className="body-f flex items-center gap-1 text-xs font-semibold mb-4" style={{ color: MUTED }}>
+              <ChevronLeft size={14} /> Back to list
             </button>
             <DetailCard data={selected} />
           </div>
@@ -472,56 +579,61 @@ export default function App() {
         {view === "scan" && (
           <div>
             {scanStatus === "idle" && (
-              <div className="text-center py-10">
+              <div className="pt-2">
                 <div className="grid grid-cols-2 gap-3">
                   <label
-                    className="flex flex-col items-center justify-center gap-2 py-8 rounded-2xl body-f cursor-pointer"
-                    style={{ background: CARD, border: `2px dashed ${CHILI}` }}
+                    className="tap-scale relative overflow-hidden flex flex-col items-center justify-center gap-2.5 py-9 rounded-2xl cursor-pointer"
+                    style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
                   >
-                    <Camera size={28} color={CHILI} />
-                    <span className="text-sm font-semibold text-center" style={{ color: INK }}>Camera-ஐ திற</span>
-                    <input type="file" accept="image/*" capture="environment" className="hidden"
-                      onChange={(e) => handleFile(e.target.files?.[0])} />
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: LIME + "18" }}>
+                      <Camera size={20} color={LIME} />
+                    </div>
+                    <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>Camera</span>
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                   </label>
                   <label
-                    className="flex flex-col items-center justify-center gap-2 py-8 rounded-2xl body-f cursor-pointer"
-                    style={{ background: CARD, border: `2px dashed ${CURRY}` }}
+                    className="tap-scale flex flex-col items-center justify-center gap-2.5 py-9 rounded-2xl cursor-pointer"
+                    style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
                   >
-                    <PackageSearch size={28} color={CURRY} />
-                    <span className="text-sm font-semibold text-center" style={{ color: INK }}>Gallery-ல தேர்வு</span>
-                    <input type="file" accept="image/*" className="hidden"
-                      onChange={(e) => handleFile(e.target.files?.[0])} />
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: SURFACE_2 }}>
+                      <ImageIcon size={20} color={MUTED} />
+                    </div>
+                    <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>Gallery</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                   </label>
                 </div>
-                <p className="body-f text-xs mt-4" style={{ color: INK, opacity: 0.5 }}>
-                  label-ல உள்ள எழுத்துக்கள் தெளிவா தெரியுற மாதிரி, நல்ல வெளிச்சத்துல புகைப்படம் எடுங்க
+                <p className="body-f text-xs mt-4 text-center" style={{ color: MUTED }}>
+                  Good lighting and a close, sharp shot of the ingredients list works best.
                 </p>
               </div>
             )}
 
             {(scanStatus === "loading" || scanStatus === "done" || scanStatus === "error") && imgPreview && (
-              <div className="mb-4 relative">
-                <img src={imgPreview} alt="scanned label" className="w-full max-h-56 object-cover rounded-xl" style={{ border: "1px solid #E3D9BB" }} />
-                <button onClick={resetScan} className="absolute top-2 right-2 p-1.5 rounded-full" style={{ background: INK }}>
-                  <X size={14} color={PAPER} />
+              <div className="mb-4 relative rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+                <img src={imgPreview} alt="scanned label" className="w-full max-h-56 object-cover" />
+                {scanStatus === "loading" && (
+                  <div className="absolute inset-x-0 h-16 pointer-events-none scan-glow" style={{ background: `linear-gradient(to bottom, transparent, ${LIME}33, transparent)` }} />
+                )}
+                <button onClick={resetScan} className="absolute top-2 right-2 p-1.5 rounded-full" style={{ background: "#0C1210CC" }}>
+                  <X size={14} color={TEXT} />
                 </button>
               </div>
             )}
 
             {scanStatus === "loading" && (
-              <div className="flex flex-col items-center py-8 body-f" style={{ color: INK }}>
-                <Loader2 className="animate-spin mb-2" />
-                <p className="text-sm opacity-70">label படிக்குது...</p>
+              <div className="flex flex-col items-center py-8 body-f" style={{ color: TEXT }}>
+                <Loader2 className="animate-spin mb-2" color={LIME} />
+                <p className="text-sm" style={{ color: MUTED }}>Reading the label…</p>
               </div>
             )}
 
             {scanStatus === "error" && (
-              <div className="text-center py-6 body-f rounded-xl px-4" style={{ color: CHILI, background: CARD }}>
+              <div className="text-center py-6 body-f rounded-2xl px-4" style={{ color: CORAL, background: SURFACE, border: `1px solid ${CORAL}40` }}>
                 <AlertTriangle className="mx-auto mb-2" />
-                <p className="text-sm font-semibold">படிக்க முடியல</p>
-                <p className="text-xs mt-2 opacity-70 break-words">{scanError}</p>
-                <label className="body-f mt-3 inline-block px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer" style={{ background: CHILI, color: PAPER }}>
-                  மறுபடியும் புகைப்படம் எடு
+                <p className="text-sm font-semibold" style={{ color: TEXT }}>Couldn't read that</p>
+                <p className="text-xs mt-2" style={{ color: MUTED }}>{scanError}</p>
+                <label className="tap-scale body-f mt-4 inline-block px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer" style={{ background: LIME, color: "#0C1210" }}>
+                  Try another photo
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                 </label>
               </div>
@@ -529,9 +641,9 @@ export default function App() {
 
             {scanStatus === "done" && scanResult && (
               <div>
-                <DetailCard data={scanResult} sourceLabel="Scan செய்யப்பட்டது" />
-                <button onClick={resetScan} className="body-f mt-4 w-full py-2.5 rounded-lg text-sm font-semibold" style={{ background: INK, color: PAPER }}>
-                  இன்னொரு பொருளை ஸ்கேன் செய்
+                <DetailCard data={scanResult} sourceLabel="Scanned" />
+                <button onClick={resetScan} className="tap-scale body-f mt-4 w-full py-3 rounded-2xl text-sm font-semibold" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
+                  Scan another product
                 </button>
               </div>
             )}
@@ -539,10 +651,10 @@ export default function App() {
         )}
       </main>
 
-      <footer className="px-5 py-6 body-f text-[11px]" style={{ color: INK, opacity: 0.5 }}>
+      <footer className="px-5 py-8 body-f text-[11px]" style={{ color: MUTED }}>
         <div className="flex items-start gap-1.5 max-w-2xl mx-auto">
           <Info size={13} className="shrink-0 mt-0.5" />
-          <p>பட்டியல் தேடல் {DB.length} demo பொருட்களுக்கு offline-ஆ வேலை செய்யும். ஸ்கேன் feature AI vision மூலமா label-ஐ நேரடியா படிக்கும் — internet தேவை.</p>
+          <p>Browse covers {DB.length} curated products, offline. Scan reads any label live using AI — needs an internet connection.</p>
         </div>
       </footer>
     </div>
