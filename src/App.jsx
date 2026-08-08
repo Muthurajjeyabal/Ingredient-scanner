@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Leaf, FlaskConical, Flame, AlertTriangle, ChevronLeft, ScanLine, Info, Camera, Loader2, X, Image as ImageIcon, Sparkles, Share2, Download } from "lucide-react";
+import { Search, Leaf, FlaskConical, Flame, AlertTriangle, ChevronLeft, ScanLine, Info, Camera, Loader2, X, Image as ImageIcon, Sparkles, Share2, Download, Globe } from "lucide-react";
+import { LANGUAGES, T } from "./i18n.js";
 
 // ---------- Design tokens ----------
 const BG = "#0C1210";
@@ -152,43 +153,147 @@ const DB = [
     ingredients: "Aqua, sodium laureth sulfate, cocamidopropyl betaine, chloroxylenol (0.3%, antibacterial), sodium chloride, PEG-7 glyceryl cocoate, fragrance, citric acid, sodium benzoate, CI 14700 (colour).",
     chemicals: ["Chloroxylenol - antibacterial agent", "Sodium benzoate - preservative", "CI 14700 - synthetic red colour"],
     allergens: ["Fragrance (parfum)"], nutrition: null },
+
+  { id: "sunfeast-yippee", name: "Sunfeast Yippee! Magic Masala Noodles", brand: "ITC", category: "food",
+    ingredients: "Wheat flour, edible vegetable oil (palm oil), salt, wheat gluten, thickener (E508), acidity regulators (E501(i), E500(i)). Masala: iodised salt, sugar, spices, onion powder, garlic powder, flavour enhancers (E627, E631), acidity regulator (E330), colour (E160c), dried coriander.",
+    chemicals: ["E508 - Potassium chloride", "E627/E631 - Flavour enhancers", "E330 - Citric acid", "E160c - Paprika oleoresin colour"],
+    allergens: ["Wheat (gluten)", "May contain milk and soy"],
+    nutrition: { calories_kcal_per_100g: 441, protein_g: 8.8, fat_g: 16.9, sugar_g: 4.2, carbs_g: 63.5, salt_g: 2.9 } },
+  { id: "act-ii-popcorn", name: "Act II Butter Popcorn", brand: "Agro Tech Foods", category: "food",
+    ingredients: "Popcorn kernels, edible vegetable oil (palm oil), salt, artificial butter flavour, colour (E160b annatto), diacetyl-free flavouring.",
+    chemicals: ["E160b - Annatto (natural colour)"],
+    allergens: ["May contain traces of milk"],
+    nutrition: { calories_kcal_per_100g: 480, protein_g: 8, fat_g: 24, sugar_g: 1, carbs_g: 58, salt_g: 2.5 } },
+  { id: "kitkat", name: "Nestlé KitKat", brand: "Nestlé", category: "food",
+    ingredients: "Sugar, wheat flour, cocoa butter, milk solids, cocoa mass, vegetable fat, emulsifiers (E442, E476), raising agent (E500), salt, flavour.",
+    chemicals: ["E442 - Ammonium phosphatide", "E476 - PGPR (emulsifier)"],
+    allergens: ["Wheat (gluten)", "Milk", "May contain nuts, soy"],
+    nutrition: { calories_kcal_per_100g: 518, protein_g: 6.3, fat_g: 26.6, sugar_g: 47.5, carbs_g: 59.2, salt_g: 0.15 } },
+  { id: "cadbury-5star", name: "Cadbury 5 Star", brand: "Mondelez", category: "food",
+    ingredients: "Sugar, glucose syrup, milk solids, cocoa butter, cocoa mass, edible vegetable fat, caramel, emulsifiers (E442, E476), salt, flavour.",
+    chemicals: ["E442 - Ammonium phosphatide", "E476 - PGPR (emulsifier)"],
+    allergens: ["Milk", "May contain nuts, wheat, soy"],
+    nutrition: { calories_kcal_per_100g: 470, protein_g: 4.5, fat_g: 22, sugar_g: 55, carbs_g: 62, salt_g: 0.2 } },
+  { id: "britannia-5050", name: "Britannia 50-50 Sweet & Salty", brand: "Britannia", category: "food",
+    ingredients: "Refined wheat flour, edible vegetable oil (palm oil), sugar, invert syrup, salt, leavening agents (E500(ii), E503(ii)), emulsifier (E322 soy lecithin), artificial flavour.",
+    chemicals: ["E500(ii) - Sodium bicarbonate", "E503(ii) - Ammonium bicarbonate", "E322 - Soy lecithin"],
+    allergens: ["Wheat (gluten)", "Soy", "May contain milk"],
+    nutrition: { calories_kcal_per_100g: 470, protein_g: 8, fat_g: 16, sugar_g: 14, carbs_g: 71, salt_g: 1.8 } },
+  { id: "mother-dairy-paneer", name: "Mother Dairy Paneer", brand: "Mother Dairy", category: "food",
+    ingredients: "Milk, citric acid (coagulant).",
+    chemicals: [],
+    allergens: ["Milk"],
+    nutrition: { calories_kcal_per_100g: 265, protein_g: 18.3, fat_g: 20.8, sugar_g: 1.2, carbs_g: 1.2, salt_g: 0.02 } },
+  { id: "aashirvaad-atta", name: "Aashirvaad Whole Wheat Atta", brand: "ITC", category: "food",
+    ingredients: "100% whole wheat flour.",
+    chemicals: [],
+    allergens: ["Wheat (gluten)"],
+    nutrition: { calories_kcal_per_100g: 341, protein_g: 12, fat_g: 1.7, sugar_g: 0, carbs_g: 69, salt_g: 0 } },
+  { id: "everest-garam-masala", name: "Everest Garam Masala", brand: "Everest Spices", category: "food",
+    ingredients: "Coriander, cumin, black pepper, cinnamon, cloves, cardamom, bay leaf, nutmeg, mace, dried chilli, salt.",
+    chemicals: [],
+    allergens: [],
+    nutrition: { calories_kcal_per_100g: 330, protein_g: 12, fat_g: 13, sugar_g: 2, carbs_g: 45, salt_g: 4 } },
+  { id: "kissan-ketchup", name: "Kissan Fresh Tomato Ketchup", brand: "Unilever", category: "food",
+    ingredients: "Tomato paste (46%), sugar, iodised salt, acidity regulator (E260), spices, onion, garlic, preservative (E211 sodium benzoate), stabiliser (E415 xanthan gum).",
+    chemicals: ["E211 - Sodium benzoate (preservative)", "E260 - Acetic acid", "E415 - Xanthan gum"],
+    allergens: [],
+    nutrition: { calories_kcal_per_100g: 120, protein_g: 1.2, fat_g: 0.2, sugar_g: 24, carbs_g: 27, salt_g: 2.1 } },
+  { id: "limca", name: "Limca", brand: "Coca-Cola India", category: "food",
+    ingredients: "Carbonated water, sugar, acidity regulator (E330 citric acid), preservative (E211 sodium benzoate), flavours.",
+    chemicals: ["E330 - Citric acid", "E211 - Sodium benzoate (preservative)"],
+    allergens: [],
+    nutrition: { calories_kcal_per_100g: 42, protein_g: 0, fat_g: 0, sugar_g: 10.5, carbs_g: 10.5, salt_g: 0 } },
+
+  { id: "vaseline-lotion", name: "Vaseline Intensive Care Lotion", brand: "Unilever", category: "cosmetic",
+    ingredients: "Water, glycerin, mineral oil, stearic acid, cetearyl alcohol, dimethicone, petrolatum, fragrance, carbomer, sodium hydroxide, disodium EDTA, methylparaben, propylparaben.",
+    chemicals: ["Methylparaben / propylparaben - preservatives", "Disodium EDTA", "Petrolatum/mineral oil"],
+    allergens: ["Fragrance (parfum)"], nutrition: null },
+  { id: "ponds-cream", name: "Pond's Cold Cream", brand: "Unilever", category: "cosmetic",
+    ingredients: "Mineral oil, water, beeswax, ceresin, sodium borate, fragrance, methylparaben, propylparaben.",
+    chemicals: ["Methylparaben / propylparaben - preservatives", "Mineral oil"],
+    allergens: ["Fragrance (parfum)", "Beeswax"], nutrition: null },
+  { id: "garnier-shampoo", name: "Garnier Ultra Blends Shampoo", brand: "L'Oréal", category: "cosmetic",
+    ingredients: "Water, sodium laureth sulfate, cocamidopropyl betaine, sodium chloride, glycol distearate, dimethicone, fragrance, citric acid, sodium benzoate, methylchloroisothiazolinone.",
+    chemicals: ["Sodium laureth sulfate - foaming agent", "Methylchloroisothiazolinone - preservative (known contact allergen)", "Sodium benzoate"],
+    allergens: ["Fragrance (parfum)", "Methylchloroisothiazolinone"], nutrition: null },
+  { id: "cinthol-soap", name: "Cinthol Original Soap", brand: "Godrej", category: "cosmetic",
+    ingredients: "Sodium palmate/sodium palm kernelate, water, glycerin, fragrance, sodium chloride, titanium dioxide, tetrasodium EDTA, BHT, trisodium etidronate.",
+    chemicals: ["Tetrasodium EDTA", "BHT - preservative", "Titanium dioxide"],
+    allergens: ["Fragrance (parfum)"], nutrition: null },
+  { id: "medimix-soap", name: "Medimix Ayurvedic Soap", brand: "Cholayil", category: "cosmetic",
+    ingredients: "Sodium palmate/sodium palate, water, glycerin, Ayurvedic herbal extracts (18 herbs), fragrance, sodium chloride, tetrasodium EDTA, titanium dioxide.",
+    chemicals: ["Tetrasodium EDTA", "Titanium dioxide"],
+    allergens: ["Fragrance (parfum)"], nutrition: null },
+  { id: "parachute-coconut-oil", name: "Parachute Coconut Oil", brand: "Marico", category: "cosmetic",
+    ingredients: "100% pure coconut oil.",
+    chemicals: [],
+    allergens: ["Coconut"], nutrition: null },
+  { id: "boroline-cream", name: "Boroline Antiseptic Cream", brand: "GD Pharmaceuticals", category: "cosmetic",
+    ingredients: "Boric acid, zinc oxide, lanolin, light liquid paraffin, sandalwood oil, chlorocresol (preservative), perfume.",
+    chemicals: ["Boric acid - mild antiseptic", "Chlorocresol - preservative"],
+    allergens: ["Fragrance (parfum)", "Lanolin"], nutrition: null },
+  { id: "emami-navratna-oil", name: "Navratna Cool Oil", brand: "Emami", category: "cosmetic",
+    ingredients: "Light liquid paraffin, coconut oil, sesame oil, extracts of amla, brahmi, henna, mint, camphor, menthol, fragrance.",
+    chemicals: ["Camphor", "Menthol"],
+    allergens: ["Fragrance (parfum)", "Menthol"], nutrition: null },
+  { id: "colgate-vedshakti", name: "Colgate Vedshakti Toothpaste", brand: "Colgate-Palmolive", category: "cosmetic",
+    ingredients: "Sorbitol, hydrated silica, water, clove oil, salt, sodium lauryl sulfate, cellulose gum, sodium fluoride (0.32% w/v), flavour, sodium saccharin, herbal extracts.",
+    chemicals: ["Sodium lauryl sulfate (SLS)", "Sodium fluoride"],
+    allergens: ["Clove oil fragrance"], nutrition: null },
+  { id: "bajaj-almond-drops", name: "Bajaj Almond Drops Hair Oil", brand: "Bajaj Consumer Care", category: "cosmetic",
+    ingredients: "Light liquid paraffin, almond oil, vitamin E, fragrance.",
+    chemicals: [],
+    allergens: ["Almond (tree nut)", "Fragrance (parfum)"], nutrition: null },
 ];
 
 // ---------- Safety heuristic ----------
+// Matches against item.ingredients + item.chemicals (chemicals stay English always).
+// Returns keys, not display text — components look up the translated note via t.additiveNotes[key].
 const FLAGGED_ADDITIVES = [
-  { kw: "sodium lauryl sulfate", note: "SLS — can dry out skin/scalp for some users" },
-  { kw: "sodium laureth sulfate", note: "SLES — mild irritant for sensitive skin" },
-  { kw: "paraben", note: "Paraben — debated link to hormone disruption" },
-  { kw: "tbhq", note: "TBHQ — regular high intake isn't advised" },
-  { kw: "monosodium glutamate", note: "MSG — may trigger headaches/sensitivity in some" },
-  { kw: " msg", note: "MSG — may trigger headaches/sensitivity in some" },
-  { kw: "hydrogenated", note: "Hydrogenated / trans fat — linked to heart health risk" },
-  { kw: "phosphoric acid", note: "Phosphoric acid — frequent high intake may affect bone health" },
-  { kw: "chloroxylenol", note: "Chloroxylenol — strong antibacterial, avoid prolonged skin contact" },
-  { kw: "ci 14700", note: "Synthetic dye" },
-  { kw: "ci 15985", note: "Synthetic dye" },
-  { kw: "ci 16035", note: "Synthetic dye" },
-  { kw: "ci 19140", note: "Synthetic dye — some studies link to hyperactivity" },
-  { kw: "ci 42090", note: "Synthetic dye" },
-  { kw: "ci 74160", note: "Synthetic dye" },
-  { kw: "e150d", note: "Caramel colour (E150d) — flagged in some studies" },
-  { kw: "e319", note: "TBHQ (E319) — regular high intake isn't advised" },
+  { kw: "sodium lauryl sulfate", key: "sls" },
+  { kw: "sodium laureth sulfate", key: "sls" },
+  { kw: "paraben", key: "parabens" },
+  { kw: "tbhq", key: "tbhq" },
+  { kw: "e319", key: "tbhq" },
+  { kw: "monosodium glutamate", key: "msg" },
+  { kw: " msg", key: "msg" },
+  { kw: "hydrogenated", key: "transfat" },
+  { kw: "phosphoric acid", key: "phosphoric" },
+  { kw: "chloroxylenol", key: "chloroxylenol" },
+  { kw: "ci 14700", key: "dye" },
+  { kw: "ci 15985", key: "dye" },
+  { kw: "ci 16035", key: "dye" },
+  { kw: "ci 19140", key: "dye" },
+  { kw: "ci 42090", key: "dye" },
+  { kw: "ci 74160", key: "dye" },
+  { kw: "e150d", key: "caramel" },
 ];
 
 function analyzeSafety(item) {
   const haystack = `${item.ingredients || ""} ${(item.chemicals || []).join(" ")}`.toLowerCase();
-  const reasons = [];
+  const flagKeys = [];
   for (const f of FLAGGED_ADDITIVES) {
-    if (haystack.includes(f.kw) && !reasons.includes(f.note)) reasons.push(f.note);
+    if (haystack.includes(f.kw) && !flagKeys.includes(f.key)) flagKeys.push(f.key);
   }
+  const flags = flagKeys.map((key) => ({ type: "additive", key }));
   const n = item.nutrition;
-  if (n?.sugar_g != null && n.sugar_g > 22) reasons.push(`High sugar (${n.sugar_g}g/100g)`);
-  if (n?.salt_g != null && n.salt_g > 1.5) reasons.push(`High salt (${n.salt_g}g/100g)`);
+  if (n?.sugar_g != null && n.sugar_g > 22) flags.push({ type: "sugar", value: n.sugar_g });
+  if (n?.salt_g != null && n.salt_g > 1.5) flags.push({ type: "salt", value: n.salt_g });
 
   let level = "clean";
-  if (reasons.length >= 3) level = "high";
-  else if (reasons.length >= 1) level = "moderate";
-  return { level, reasons };
+  if (flags.length >= 3) level = "high";
+  else if (flags.length >= 1) level = "moderate";
+  return { level, flags };
+}
+
+function formatReasons(flags, t) {
+  return flags.map((f) => {
+    if (f.type === "additive") return t.additiveNotes[f.key] || f.key;
+    if (f.type === "sugar") return `${t.highSugar} (${f.value}g/100g)`;
+    if (f.type === "salt") return `${t.highSalt} (${f.value}g/100g)`;
+    return "";
+  });
 }
 
 // ---------- Small UI pieces ----------
@@ -217,12 +322,13 @@ function Nutrient({ label, value, unit }) {
   );
 }
 
-function SafetyBadge({ item }) {
-  const { level, reasons } = analyzeSafety(item);
+function SafetyBadge({ item, t }) {
+  const { level, flags } = analyzeSafety(item);
+  const reasons = formatReasons(flags, t);
   const config = {
-    clean: { color: LIME, label: "Looks clean", sub: "No flagged additives found" },
-    moderate: { color: AMBER, label: "Worth a closer look", sub: `${reasons.length} thing${reasons.length > 1 ? "s" : ""} to know` },
-    high: { color: CORAL, label: "Several flags", sub: `${reasons.length} things to know` },
+    clean: { color: LIME, label: t.safeCleanLabel, sub: t.safeCleanSub },
+    moderate: { color: AMBER, label: t.safeModerateLabel, sub: `${reasons.length} ${t.thingsToKnow}` },
+    high: { color: CORAL, label: t.safeHighLabel, sub: `${reasons.length} ${t.thingsToKnow}` },
   }[level];
   return (
     <div
@@ -246,42 +352,43 @@ function SafetyBadge({ item }) {
         </ul>
       )}
       <p className="px-4 pb-3 body-f text-[10px]" style={{ color: MUTED }}>
-        General consumer-awareness info, not medical advice.
+        {t.safetyDisclaimer}
       </p>
     </div>
   );
 }
 
-function buildShareText(data) {
-  const { level, reasons } = analyzeSafety(data);
-  const label = { clean: "Looks clean", moderate: "Worth a closer look", high: "Several flags" }[level];
+function buildShareText(data, t) {
+  const { level, flags } = analyzeSafety(data);
+  const reasons = formatReasons(flags, t);
+  const label = { clean: t.safeCleanLabel, moderate: t.safeModerateLabel, high: t.safeHighLabel }[level];
   const name = data.name || data.product_name;
-  let text = `${name}${data.brand ? ` (${data.brand})` : ""}\n\nSafety: ${label}`;
+  let text = `${name}${data.brand ? ` (${data.brand})` : ""}\n\n${label}`;
   if (reasons.length) text += `\n${reasons.map((r) => `• ${r}`).join("\n")}`;
-  if (data.ingredients) text += `\n\nIngredients: ${data.ingredients}`;
+  if (data.ingredients) text += `\n\n${t.ingredientsTitle}: ${data.ingredients}`;
   if (data.nutrition?.calories_kcal_per_100g != null) {
-    text += `\n\nCalories: ${data.nutrition.calories_kcal_per_100g} kcal/100g`;
+    text += `\n\n${t.calories}: ${data.nutrition.calories_kcal_per_100g} kcal/100g`;
   }
-  text += `\n\n— checked on Insider`;
+  text += `\n\n${t.checkedOn}`;
   return text;
 }
 
-async function shareProduct(data, setToast) {
-  const text = buildShareText(data);
+async function shareProduct(data, t, setToast) {
+  const text = buildShareText(data, t);
   const title = data.name || data.product_name || "Insider";
   try {
     if (navigator.share) {
       await navigator.share({ title, text });
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(text);
-      setToast?.("Copied to clipboard");
+      setToast?.(t.copiedClipboard);
     }
   } catch (err) {
     // user cancelled the native share sheet — not an error worth surfacing
     if (err?.name !== "AbortError") {
       try {
         await navigator.clipboard.writeText(text);
-        setToast?.("Copied to clipboard");
+        setToast?.(t.copiedClipboard);
       } catch {
         // clipboard unavailable too — silently give up, nothing else we can do
       }
@@ -289,11 +396,11 @@ async function shareProduct(data, setToast) {
   }
 }
 
-function HowItWorks({ onClose }) {
+function HowItWorks({ onClose, t }) {
   const steps = [
-    { icon: Camera, title: "Point your camera at any label", body: "Food packet, toothpaste tube, soap wrapper — snap a clear photo of the ingredients list." },
-    { icon: Sparkles, title: "AI reads it instantly", body: "Gemini vision transcribes and interprets the full ingredient list, even in poor lighting or small print." },
-    { icon: ScanLine, title: "See what's really inside", body: "Get a plain-English breakdown: chemicals, allergens, nutrition, and a safety flag — all in one card." },
+    { icon: Camera, title: t.step1Title, body: t.step1Body },
+    { icon: Sparkles, title: t.step2Title, body: t.step2Body },
+    { icon: ScanLine, title: t.step3Title, body: t.step3Body },
   ];
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "#0C1210CC" }} onClick={onClose}>
@@ -303,7 +410,7 @@ function HowItWorks({ onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="display text-xl" style={{ color: TEXT }}>How Insider works</h3>
+          <h3 className="display text-xl" style={{ color: TEXT }}>{t.howTitle}</h3>
           <button onClick={onClose} className="tap-scale w-8 h-8 rounded-full flex items-center justify-center" style={{ background: SURFACE_2 }}>
             <X size={14} color={MUTED} />
           </button>
@@ -328,28 +435,28 @@ function HowItWorks({ onClose }) {
           ))}
         </div>
         <p className="body-f text-[11px] mt-6 pt-5" style={{ color: MUTED, borderTop: `1px solid ${BORDER}` }}>
-          Safety flags are general consumer-awareness info based on commonly-discussed additives — not medical advice. Always check with a professional for personal health decisions.
+          {t.howDisclaimer}
         </p>
         <button
           onClick={onClose}
           className="tap-scale w-full mt-5 py-3 rounded-2xl body-f text-sm font-semibold"
           style={{ background: LIME, color: "#0C1210" }}
         >
-          Got it
+          {t.gotIt}
         </button>
       </div>
     </div>
   );
 }
 
-function DetailCard({ data, sourceLabel }) {
+function DetailCard({ data, sourceLabel, t }) {
   const chemicals = data.chemicals || [];
   const allergens = data.allergens || [];
   const nutrition = data.nutrition;
   const [toast, setToast] = useState("");
 
   const handleShare = async () => {
-    await shareProduct(data, setToast);
+    await shareProduct(data, t, setToast);
     setTimeout(() => setToast(""), 2000);
   };
 
@@ -387,16 +494,15 @@ function DetailCard({ data, sourceLabel }) {
       </div>
 
       <div className="p-5">
-        <SafetyBadge item={data} />
-
+        <SafetyBadge item={data} t={t} />
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2.5">
             <Leaf size={15} color={LIME} />
-            <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Ingredients</h3>
+            <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.ingredientsTitle}</h3>
           </div>
           <p className="body-f text-[15px] leading-relaxed" style={{ color: TEXT, opacity: 0.9 }}>
-            {data.ingredients || "Ingredients not available."}
+            {data.ingredients || t.ingredientsUnavailable}
           </p>
         </div>
 
@@ -404,7 +510,7 @@ function DetailCard({ data, sourceLabel }) {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2.5">
               <FlaskConical size={15} color={CORAL} />
-              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Additives &amp; chemicals</h3>
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.additivesTitle}</h3>
             </div>
             <div className="flex flex-wrap">{chemicals.map((a, i) => <Chip key={i} tone="coral">{a}</Chip>)}</div>
           </div>
@@ -414,7 +520,7 @@ function DetailCard({ data, sourceLabel }) {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2.5">
               <AlertTriangle size={15} color={AMBER} />
-              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Allergen warnings</h3>
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.allergensTitle}</h3>
             </div>
             <div className="flex flex-wrap">{allergens.map((a, i) => <Chip key={i} tone="amber">{a}</Chip>)}</div>
           </div>
@@ -424,15 +530,15 @@ function DetailCard({ data, sourceLabel }) {
           <div>
             <div className="flex items-center gap-2 mb-2.5">
               <Flame size={15} color={CORAL} />
-              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>Nutrition — per 100g</h3>
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.nutritionTitle}</h3>
             </div>
             <div>
-              <Nutrient label="Calories" value={nutrition.calories_kcal_per_100g} unit="kcal" />
-              <Nutrient label="Protein" value={nutrition.protein_g} unit="g" />
-              <Nutrient label="Fat" value={nutrition.fat_g} unit="g" />
-              <Nutrient label="Sugar" value={nutrition.sugar_g} unit="g" />
-              <Nutrient label="Carbohydrate" value={nutrition.carbs_g} unit="g" />
-              <Nutrient label="Salt" value={nutrition.salt_g} unit="g" />
+              <Nutrient label={t.calories} value={nutrition.calories_kcal_per_100g} unit="kcal" />
+              <Nutrient label={t.protein} value={nutrition.protein_g} unit="g" />
+              <Nutrient label={t.fat} value={nutrition.fat_g} unit="g" />
+              <Nutrient label={t.sugar} value={nutrition.sugar_g} unit="g" />
+              <Nutrient label={t.carbs} value={nutrition.carbs_g} unit="g" />
+              <Nutrient label={t.salt} value={nutrition.salt_g} unit="g" />
             </div>
           </div>
         )}
@@ -487,6 +593,25 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
   const [showHow, setShowHow] = useState(false);
+
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem("insider_lang") || "en";
+    } catch {
+      return "en";
+    }
+  });
+  const t = T[lang] || T.en;
+  const currentLangMeta = LANGUAGES.find((l) => l.code === lang) || LANGUAGES[0];
+
+  const changeLang = (code) => {
+    setLang(code);
+    try {
+      localStorage.setItem("insider_lang", code);
+    } catch {
+      // localStorage unavailable — language just won't persist across visits
+    }
+  };
 
   useEffect(() => {
     try {
@@ -581,6 +706,7 @@ export default function App() {
   "allergens": string[],
   "nutrition": ${mode === "food" ? `{ "calories_kcal_per_100g": number|null, "protein_g": number|null, "fat_g": number|null, "sugar_g": number|null, "carbs_g": number|null, "salt_g": number|null }` : "null"}
 }
+Write the "ingredients" and "allergens" values in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
 If the label truly isn't readable, respond with only: {"error": "Couldn't read the label clearly — try a closer, well-lit photo"}`;
 
       const response = await fetch("/api/scan", {
@@ -590,8 +716,8 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
       });
 
       if (!response.ok) {
-        const t = await response.text();
-        throw new Error(`API error ${response.status}: ${t.slice(0, 200)}`);
+        const errText = await response.text();
+        throw new Error(`API error ${response.status}: ${errText.slice(0, 200)}`);
       }
 
       const data = await response.json();
@@ -609,7 +735,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
       saveToRecent(parsed);
     } catch (err) {
       const msg = err.message || String(err);
-      setScanError(msg.includes("Failed to fetch") ? "Network issue — check your connection and try again" : msg);
+      setScanError(msg.includes("Failed to fetch") ? t.networkIssue : msg);
       setScanStatus("error");
     }
   };
@@ -628,12 +754,12 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ background: BG }}>
-      {showHow && <HowItWorks onClose={() => setShowHow(false)} />}
+    <div className="min-h-screen w-full" style={{ background: BG }} dir={lang === "ur" ? "rtl" : "ltr"}>
+      {showHow && <HowItWorks onClose={() => setShowHow(false)} t={t} />}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
         .display { font-family: 'Fraunces', serif; }
-        .body-f { font-family: 'Inter', sans-serif; }
+        .body-f { font-family: 'Inter', 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Kannada', 'Noto Sans Malayalam', 'Noto Sans Gujarati', 'Noto Sans Gurmukhi', 'Noto Sans Oriya', 'Noto Nastaliq Urdu', sans-serif; }
         .mono-f { font-family: 'JetBrains Mono', monospace; }
         @keyframes scanmove { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
         .scan-glow { animation: scanmove 2.2s ease-in-out infinite; }
@@ -643,6 +769,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
         .animate-fade-in { animation: fadein .35s ease both; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .shimmer { background: linear-gradient(90deg, ${SURFACE_2} 25%, #2A342D 50%, ${SURFACE_2} 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+        .lang-select { -webkit-appearance: none; appearance: none; }
       `}</style>
 
       {/* Header */}
@@ -656,7 +783,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
               <span className="body-f text-[11px] tracking-[0.25em] uppercase" style={{ color: MUTED }}>
-                AI Label Scanner
+                {t.tagline}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -666,24 +793,39 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                   className="tap-scale flex items-center gap-1.5 px-3 py-1.5 rounded-full body-f text-xs font-semibold"
                   style={{ background: LIME, color: "#0C1210" }}
                 >
-                  <Download size={13} /> Install app
+                  <Download size={13} /> {t.installApp}
                 </button>
               )}
+              <div className="relative">
+                <select
+                  value={lang}
+                  onChange={(e) => changeLang(e.target.value)}
+                  className="lang-select tap-scale flex items-center gap-1 pl-2.5 pr-6 py-1.5 rounded-full body-f text-xs font-semibold"
+                  style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code} style={{ background: SURFACE, color: TEXT }}>
+                      {l.native}
+                    </option>
+                  ))}
+                </select>
+                <Globe size={11} color={MUTED} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2" />
+              </div>
               <button
                 onClick={() => setShowHow(true)}
-                className="tap-scale w-7 h-7 rounded-full flex items-center justify-center"
+                className="tap-scale w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                 style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
-                aria-label="How it works"
+                aria-label={t.howItWorksAria}
               >
                 <Info size={13} color={MUTED} />
               </button>
             </div>
           </div>
           <h1 className="display text-[2.6rem] leading-[1.05]" style={{ color: TEXT }}>
-            Know what's<br /><em style={{ color: LIME, fontStyle: "italic" }}>really</em> inside.
+            {t.headline1}<br /><em style={{ color: LIME, fontStyle: "italic" }}>{t.headlineEm}</em> {t.headline2}
           </h1>
           <p className="body-f text-sm mt-3" style={{ color: MUTED }}>
-            Food, toothpaste, soap — scan any label to see the ingredients, chemicals and nutrition behind it.
+            {t.subhead}
           </p>
 
           {/* Browse / Scan segmented control */}
@@ -693,21 +835,21 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
               className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
               style={{ background: view === "browse" ? LIME : "transparent", color: view === "browse" ? "#0C1210" : MUTED }}
             >
-              <Search size={14} /> Browse
+              <Search size={14} /> {t.browse}
             </button>
             <button
               onClick={() => setView("scan")}
               className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
               style={{ background: view === "scan" ? LIME : "transparent", color: view === "scan" ? "#0C1210" : MUTED }}
             >
-              <ScanLine size={14} /> Scan
+              <ScanLine size={14} /> {t.scanTab}
             </button>
           </div>
 
           {view === "browse" && (
             <>
               <div className="flex gap-2 mt-4">
-                {[{ id: "food", label: "Food" }, { id: "cosmetic", label: "Personal care" }].map(({ id, label }) => (
+                {[{ id: "food", label: t.food }, { id: "cosmetic", label: t.personalCare }].map(({ id, label }) => (
                   <button
                     key={id}
                     onClick={() => { setMode(id); setSelected(null); setQuery(""); }}
@@ -727,7 +869,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                 <input
                   value={query}
                   onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
-                  placeholder={mode === "food" ? "Parle-G, Maggi, Lay's…" : "Colgate, Dove, Lifebuoy…"}
+                  placeholder={mode === "food" ? t.searchFoodPlaceholder : t.searchCosmeticPlaceholder}
                   className="body-f flex-1 bg-transparent outline-none text-sm"
                   style={{ color: TEXT }}
                 />
@@ -743,8 +885,8 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
           <>
             {results.length === 0 && (
               <div className="text-center py-12 body-f" style={{ color: MUTED }}>
-                <p className="text-sm">No match in the curated list yet.</p>
-                <p className="text-xs mt-1">Try the Scan tab to read any product's label directly.</p>
+                <p className="text-sm">{t.noMatch}</p>
+                <p className="text-xs mt-1">{t.tryScanHint}</p>
               </div>
             )}
             <div className="grid gap-2.5">
@@ -769,7 +911,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                     {p.nutrition?.calories_kcal_per_100g != null && (
                       <div className="text-right shrink-0">
                         <p className="mono-f text-sm font-bold" style={{ color: TEXT }}>{p.nutrition.calories_kcal_per_100g}</p>
-                        <p className="body-f text-[10px]" style={{ color: MUTED }}>kcal/100g</p>
+                        <p className="body-f text-[10px]" style={{ color: MUTED }}>{t.kcalPer100g}</p>
                       </div>
                     )}
                   </button>
@@ -782,9 +924,9 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
         {view === "browse" && selected && (
           <div>
             <button onClick={() => setSelected(null)} className="body-f flex items-center gap-1 text-xs font-semibold mb-4" style={{ color: MUTED }}>
-              <ChevronLeft size={14} /> Back to list
+              <ChevronLeft size={14} /> {t.backToList}
             </button>
-            <DetailCard data={selected} />
+            <DetailCard data={selected} t={t} />
           </div>
         )}
 
@@ -800,7 +942,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                     <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: LIME + "18" }}>
                       <Camera size={20} color={LIME} />
                     </div>
-                    <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>Camera</span>
+                    <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>{t.cameraLabel}</span>
                     <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                   </label>
                   <label
@@ -810,17 +952,17 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                     <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: SURFACE_2 }}>
                       <ImageIcon size={20} color={MUTED} />
                     </div>
-                    <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>Gallery</span>
+                    <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>{t.galleryLabel}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                   </label>
                 </div>
                 <p className="body-f text-xs mt-4 text-center" style={{ color: MUTED }}>
-                  Good lighting and a close, sharp shot of the ingredients list works best.
+                  {t.scanHint}
                 </p>
 
                 {recentScans.length > 0 && (
                   <div className="mt-7 animate-fade-in">
-                    <p className="body-f text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: MUTED }}>Recent scans</p>
+                    <p className="body-f text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: MUTED }}>{t.recentScansTitle}</p>
                     <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
                       {recentScans.map((item, i) => {
                         const { level } = analyzeSafety(item);
@@ -862,7 +1004,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
               <div className="animate-fade-in">
                 <div className="flex items-center gap-2 justify-center py-4 body-f" style={{ color: MUTED }}>
                   <Loader2 className="animate-spin" size={15} color={LIME} />
-                  <p className="text-sm">Reading the label…</p>
+                  <p className="text-sm">{t.readingLabel}</p>
                 </div>
                 <div className="rounded-3xl overflow-hidden p-5" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
                   <div className="shimmer h-5 w-2/3 rounded-lg mb-2.5" />
@@ -878,10 +1020,10 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             {scanStatus === "error" && (
               <div className="text-center py-6 body-f rounded-2xl px-4" style={{ color: CORAL, background: SURFACE, border: `1px solid ${CORAL}40` }}>
                 <AlertTriangle className="mx-auto mb-2" />
-                <p className="text-sm font-semibold" style={{ color: TEXT }}>Couldn't read that</p>
+                <p className="text-sm font-semibold" style={{ color: TEXT }}>{t.couldntRead}</p>
                 <p className="text-xs mt-2" style={{ color: MUTED }}>{scanError}</p>
                 <label className="tap-scale body-f mt-4 inline-block px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer" style={{ background: LIME, color: "#0C1210" }}>
-                  Try another photo
+                  {t.tryAnotherPhoto}
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                 </label>
               </div>
@@ -889,9 +1031,9 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
 
             {scanStatus === "done" && scanResult && (
               <div className="animate-fade-in">
-                <DetailCard data={scanResult} sourceLabel="Scanned" />
+                <DetailCard data={scanResult} sourceLabel={t.scannedBadge} t={t} />
                 <button onClick={resetScan} className="tap-scale body-f mt-4 w-full py-3 rounded-2xl text-sm font-semibold" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
-                  Scan another product
+                  {t.scanAnotherProduct}
                 </button>
               </div>
             )}
@@ -902,7 +1044,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
       <footer className="px-5 py-8 body-f text-[11px]" style={{ color: MUTED }}>
         <div className="flex items-start gap-1.5 max-w-2xl mx-auto">
           <Info size={13} className="shrink-0 mt-0.5" />
-          <p>Browse covers {DB.length} curated products, offline. Scan reads any label live using AI — needs an internet connection.</p>
+          <p>{t.footerPrefix} {DB.length} {t.footerSuffix}</p>
         </div>
       </footer>
     </div>
