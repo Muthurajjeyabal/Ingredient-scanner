@@ -821,7 +821,10 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
               </button>
             </div>
           </div>
-          <h1 className="display text-[2.6rem] leading-[1.05]" style={{ color: TEXT }}>
+          <h1
+            className="display leading-[1.15]"
+            style={{ color: TEXT, fontSize: "clamp(1.7rem, 8vw, 2.6rem)", overflowWrap: "break-word", wordBreak: "break-word" }}
+          >
             {t.headline1}<br /><em style={{ color: LIME, fontStyle: "italic" }}>{t.headlineEm}</em> {t.headline2}
           </h1>
           <p className="body-f text-sm mt-3" style={{ color: MUTED }}>
@@ -883,12 +886,13 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
       <main key={view + (selected ? "-detail" : "")} className="px-5 pb-8 max-w-2xl mx-auto animate-fade-in">
         {view === "browse" && !selected && (
           <>
-            {results.length === 0 && (
+            {query.trim() && results.length === 0 && (
               <div className="text-center py-12 body-f" style={{ color: MUTED }}>
                 <p className="text-sm">{t.noMatch}</p>
                 <p className="text-xs mt-1">{t.tryScanHint}</p>
               </div>
             )}
+            {query.trim() && results.length > 0 && (
             <div className="grid gap-2.5">
               {results.map((p, i) => {
                 const { level } = analyzeSafety(p);
@@ -918,6 +922,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                 );
               })}
             </div>
+            )}
           </>
         )}
 
