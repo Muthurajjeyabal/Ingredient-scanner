@@ -386,6 +386,22 @@ function levelFromCount(count) {
   return "clean";
 }
 
+// Categorizes detected chemicals/ingredient text into simple formulation
+// buckets (client-side, no AI) so "why is this processed?" has a concrete answer.
+const PROCESSING_CATEGORIES = [
+  { key: "catSweetener", kw: ["sugar", "glucose", "fructose", "syrup", "dextrose", "saccharin", "sweetener"] },
+  { key: "catPreservative", kw: ["sorbate", "benzoate", "preservative", "tbhq", "bht", " edta"] },
+  { key: "catColour", kw: ["colour", "color", "carotene", "tartrazine", "annatto", "ci 1", "ci 4", "ci 7"] },
+  { key: "catFlavour", kw: ["flavour", "flavor", "essence", "aroma"] },
+  { key: "catThickener", kw: ["starch", "gum", "pectin", "cmc", "stabiliser", "stabilizer", "thickener"] },
+  { key: "catEmulsifier", kw: ["lecithin", "emulsifier", "glyceride"] },
+  { key: "catAcidRegulator", kw: ["citric acid", "phosphoric acid", "acidity regulator", "malic acid", "acetic acid"] },
+];
+function classifyProcessing(item) {
+  const haystack = `${asArray(item.chemicals).join(" ")} ${asText(item.ingredients)}`.toLowerCase();
+  return PROCESSING_CATEGORIES.filter((c) => c.kw.some((k) => haystack.includes(k))).map((c) => c.key);
+}
+
 function computeProductInsight(item, t) {
   const { flags } = analyzeSafety(item);
   const chemicals = asArray(item.chemicals);
@@ -401,6 +417,7 @@ function computeProductInsight(item, t) {
   if (chemicals.length >= 5) processing = "procUltra";
   else if (chemicals.length >= 3) processing = "procHigh";
   else if (chemicals.length >= 1) processing = "procModerate";
+  const processingCategories = processing === "procMinimal" ? [] : classifyProcessing(item);
 
   const carefulKeys = [];
   if (asArray(item.allergens).length > 0) carefulKeys.push("carefulAllergy");
@@ -412,7 +429,7 @@ function computeProductInsight(item, t) {
     overall,
     ingredientLevel, ingredientReasons: formatReasons(ingredientFlags, t),
     nutritionLevel, nutritionReasons: formatReasons(nutritionFlags, t),
-    processing, carefulKeys,
+    processing, processingCategories, carefulKeys,
   };
 }
 
@@ -464,6 +481,11 @@ function ProductInsightCard({ item, t, sourceLabel }) {
       <div className="p-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
         <p className="body-f text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{t.processing}</p>
         <p className="body-f text-sm" style={{ color: TEXT }}>{t[insight.processing]}</p>
+        {insight.processingCategories.length > 0 && (
+          <p className="body-f text-xs mt-1.5" style={{ color: MUTED }}>
+            {t.processedBecause} {insight.processingCategories.map((k) => t[k]).join(", ")}
+          </p>
+        )}
       </div>
 
       {insight.carefulKeys.length > 0 && (
