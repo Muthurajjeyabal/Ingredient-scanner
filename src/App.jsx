@@ -289,6 +289,59 @@ async function shareProduct(data, setToast) {
   }
 }
 
+function HowItWorks({ onClose }) {
+  const steps = [
+    { icon: Camera, title: "Point your camera at any label", body: "Food packet, toothpaste tube, soap wrapper — snap a clear photo of the ingredients list." },
+    { icon: Sparkles, title: "AI reads it instantly", body: "Gemini vision transcribes and interprets the full ingredient list, even in poor lighting or small print." },
+    { icon: ScanLine, title: "See what's really inside", body: "Get a plain-English breakdown: chemicals, allergens, nutrition, and a safety flag — all in one card." },
+  ];
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "#0C1210CC" }} onClick={onClose}>
+      <div
+        className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 animate-fade-in"
+        style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="display text-xl" style={{ color: TEXT }}>How Insider works</h3>
+          <button onClick={onClose} className="tap-scale w-8 h-8 rounded-full flex items-center justify-center" style={{ background: SURFACE_2 }}>
+            <X size={14} color={MUTED} />
+          </button>
+        </div>
+        <div className="space-y-5">
+          {steps.map((s, i) => (
+            <div key={i} className="flex gap-3.5">
+              <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center relative" style={{ background: LIME + "18" }}>
+                <s.icon size={16} color={LIME} />
+                <span
+                  className="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full flex items-center justify-center mono-f text-[9px] font-bold"
+                  style={{ background: LIME, color: "#0C1210" }}
+                >
+                  {i + 1}
+                </span>
+              </div>
+              <div>
+                <p className="body-f text-sm font-semibold" style={{ color: TEXT }}>{s.title}</p>
+                <p className="body-f text-xs mt-1 leading-relaxed" style={{ color: MUTED }}>{s.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="body-f text-[11px] mt-6 pt-5" style={{ color: MUTED, borderTop: `1px solid ${BORDER}` }}>
+          Safety flags are general consumer-awareness info based on commonly-discussed additives — not medical advice. Always check with a professional for personal health decisions.
+        </p>
+        <button
+          onClick={onClose}
+          className="tap-scale w-full mt-5 py-3 rounded-2xl body-f text-sm font-semibold"
+          style={{ background: LIME, color: "#0C1210" }}
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function DetailCard({ data, sourceLabel }) {
   const chemicals = data.chemicals || [];
   const allergens = data.allergens || [];
@@ -433,6 +486,18 @@ export default function App() {
   const [mode, setMode] = useState("food");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
+  const [showHow, setShowHow] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("insider_seen_intro")) {
+        setShowHow(true);
+        localStorage.setItem("insider_seen_intro", "1");
+      }
+    } catch {
+      // localStorage unavailable — just skip the auto-intro, no harm done
+    }
+  }, []);
 
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(false);
@@ -564,6 +629,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
 
   return (
     <div className="min-h-screen w-full" style={{ background: BG }}>
+      {showHow && <HowItWorks onClose={() => setShowHow(false)} />}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
         .display { font-family: 'Fraunces', serif; }
@@ -593,15 +659,25 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                 AI Label Scanner
               </span>
             </div>
-            {installPrompt && !installed && (
+            <div className="flex items-center gap-2">
+              {installPrompt && !installed && (
+                <button
+                  onClick={handleInstall}
+                  className="tap-scale flex items-center gap-1.5 px-3 py-1.5 rounded-full body-f text-xs font-semibold"
+                  style={{ background: LIME, color: "#0C1210" }}
+                >
+                  <Download size={13} /> Install app
+                </button>
+              )}
               <button
-                onClick={handleInstall}
-                className="tap-scale flex items-center gap-1.5 px-3 py-1.5 rounded-full body-f text-xs font-semibold"
-                style={{ background: LIME, color: "#0C1210" }}
+                onClick={() => setShowHow(true)}
+                className="tap-scale w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
+                aria-label="How it works"
               >
-                <Download size={13} /> Install app
+                <Info size={13} color={MUTED} />
               </button>
-            )}
+            </div>
           </div>
           <h1 className="display text-[2.6rem] leading-[1.05]" style={{ color: TEXT }}>
             Know what's<br /><em style={{ color: LIME, fontStyle: "italic" }}>really</em> inside.
