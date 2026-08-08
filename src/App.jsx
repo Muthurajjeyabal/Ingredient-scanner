@@ -265,6 +265,32 @@ function asText(v) {
   return Array.isArray(v) ? v.join(", ") : String(v);
 }
 
+// ---------- Small UI pieces ----------
+function Chip({ children, tone = "line" }) {
+  const styles = {
+    line: { background: "transparent", border: `1px solid ${BORDER}`, color: TEXT },
+    coral: { background: CORAL + "1f", border: `1px solid ${CORAL}55`, color: "#FFD3CC" },
+    amber: { background: AMBER + "1f", border: `1px solid ${AMBER}55`, color: "#FFE3B0" },
+  }[tone];
+  return (
+    <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-medium tracking-wide mr-1.5 mb-1.5" style={styles}>
+      {children}
+    </span>
+  );
+}
+
+function Nutrient({ label, value, unit }) {
+  if (value === undefined || value === null) return null;
+  return (
+    <div className="flex items-baseline justify-between py-2.5" style={{ borderBottom: `1px solid ${BORDER}` }}>
+      <span className="text-sm" style={{ color: MUTED }}>{label}</span>
+      <span className="mono-f text-sm font-semibold" style={{ color: TEXT }}>
+        {value}{unit ? <span style={{ color: MUTED }} className="ml-1">{unit}</span> : null}
+      </span>
+    </div>
+  );
+}
+
 const FLAGGED_ADDITIVES = [
   { kw: "sodium lauryl sulfate", key: "sls" },
   { kw: "sodium laureth sulfate", key: "sls" },
