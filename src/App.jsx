@@ -575,18 +575,40 @@ function DetailCard({ data, sourceLabel, t }) {
           </button>
         </div>
         {data.brand && <p className="body-f text-sm mt-1" style={{ color: MUTED }}>{data.brand}</p>}
-        {sourceLabel && (
-          <span
-            className="inline-flex items-center gap-1 mt-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mono-f"
-            style={{ background: LIME + "1a", color: LIME, border: `1px solid ${LIME}40` }}
-          >
-            <Sparkles size={11} />{sourceLabel}
-          </span>
+        {asText(data.summary) && (
+          <p className="body-f text-sm mt-3 leading-relaxed" style={{ color: TEXT, opacity: 0.85 }}>{asText(data.summary)}</p>
         )}
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          {sourceLabel && (
+            <span
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mono-f"
+              style={{ background: LIME + "1a", color: LIME, border: `1px solid ${LIME}40` }}
+            >
+              <Sparkles size={11} />{sourceLabel}
+            </span>
+          )}
+          {sourceLabel && data.confidence === "partial" && (
+            <span
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold"
+              style={{ background: AMBER + "1a", color: AMBER, border: `1px solid ${AMBER}40` }}
+            >
+              ⚠️ {t.scanConfidencePartial}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="p-5">
         <ProductInsightCard item={data} t={t} sourceLabel={sourceLabel} />
+
+        {asText(data.ingredients) && (
+          <div className="mb-6 rounded-2xl p-4" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
+            <p className="body-f text-xs font-bold mb-1" style={{ color: LIME }}>💡 {t.didYouKnow}</p>
+            <p className="body-f text-xs leading-relaxed" style={{ color: MUTED }}>
+              <span style={{ color: TEXT, fontWeight: 600 }}>{asText(data.ingredients).split(",")[0].trim()}</span> — {t.firstIngredientNote}
+            </p>
+          </div>
+        )}
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2.5">
@@ -632,6 +654,9 @@ function DetailCard({ data, sourceLabel, t }) {
               <Nutrient label={t.carbs} value={nutrition.carbs_g} unit="g" />
               <Nutrient label={t.salt} value={nutrition.salt_g} unit="g" />
             </div>
+            {typeof nutrition.fat_g === "number" && typeof nutrition.calories_kcal_per_100g === "number" && nutrition.calories_kcal_per_100g > 0 && (nutrition.fat_g * 9) / nutrition.calories_kcal_per_100g > 0.5 && (
+              <p className="body-f text-xs mt-2.5" style={{ color: MUTED }}>🥑 {t.mostCaloriesFromFat}</p>
+            )}
           </div>
         )}
       </div>
@@ -883,12 +908,16 @@ export default function App() {
 {
   "name": string,
   "brand": string,
+  "summary": string,
   "ingredients": string,
   "chemicals": string[],
   "allergens": string[],
-  "nutrition": ${mode === "food" ? `{ "calories_kcal_per_100g": number|null, "protein_g": number|null, "fat_g": number|null, "sugar_g": number|null, "carbs_g": number|null, "salt_g": number|null }` : "null"}
+  "nutrition": ${mode === "food" ? `{ "calories_kcal_per_100g": number|null, "protein_g": number|null, "fat_g": number|null, "sugar_g": number|null, "carbs_g": number|null, "salt_g": number|null }` : "null"},
+  "confidence": "high" | "partial"
 }
-Write the "ingredients" and "allergens" values in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
+"summary" is one short plain sentence describing what kind of product this is and its main ingredient base (e.g. "A vegetable-oil based mayonnaise with egg and preservatives.") — written for someone who knows nothing about the product yet.
+"confidence" should be "partial" if any part of the ingredients or nutrition text was blurry, cut off, or you had to guess at a word — otherwise "high".
+Write the "summary", "ingredients" and "allergens" values in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
 If the label truly isn't readable, respond with only: {"error": "Couldn't read the label clearly — try a closer, well-lit photo"}`;
 
       const response = await fetch("/api/scan", {
