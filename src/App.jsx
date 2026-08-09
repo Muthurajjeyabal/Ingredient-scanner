@@ -461,11 +461,12 @@ function ProductInsightCard({ item, t, sourceLabel }) {
   };
 
   return (
-    <div className="mb-6 rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
+    <div className="glow-card sheet-up mb-6 rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${color}40` }}>
+      <div className="h-1 bar-flow" style={{ background: `linear-gradient(90deg, ${color}, ${color}00, ${color})` }} />
       <div className="p-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${BORDER}` }}>
         <span className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.overallChoice}</span>
         <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: color + "1a", color }}>
-          <span className="w-2 h-2 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+          <span className="ring-burst w-2 h-2 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}`, color }} />
           {choiceLabel}
         </span>
       </div>
@@ -556,9 +557,9 @@ function HowItWorks({ onClose, t }) {
     { icon: ScanLine, title: t.step3Title, body: t.step3Body },
   ];
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "#0C1210CC" }} onClick={onClose}>
+    <div className="modal-blur fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "#0C1210CC" }} onClick={onClose}>
       <div
-        className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 animate-fade-in"
+        className="glow-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 sheet-up"
         style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -654,7 +655,7 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
   };
 
   return (
-    <div className="rounded-3xl overflow-hidden relative" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+    <div className="glow-card rounded-3xl overflow-hidden relative" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
       {toast && (
         <div
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-full body-f text-xs font-semibold animate-fade-in"
@@ -1220,25 +1221,83 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
         .mono-f { font-family: 'JetBrains Mono', monospace; }
         @keyframes scanmove { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
         .scan-glow { animation: scanmove 2.2s ease-in-out infinite; }
-        .tap-scale { transition: transform .15s ease, border-color .15s ease, background .15s ease; }
-        .tap-scale:active { transform: scale(0.98); }
-        @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadein .35s ease both; }
+        .tap-scale { transition: transform .25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color .15s ease, background .15s ease; }
+        .tap-scale:active { transform: scale(0.96); }
+        @keyframes fadein { from { opacity: 0; transform: translateY(10px) scale(0.98); filter: blur(4px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+        .animate-fade-in { animation: fadein .5s cubic-bezier(0.16, 1, 0.3, 1) both; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .shimmer { background: linear-gradient(90deg, ${SURFACE_2} 25%, #2A342D 50%, ${SURFACE_2} 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
         .lang-select { -webkit-appearance: none; appearance: none; }
+        @keyframes pulseglow { 0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; } 70% { box-shadow: 0 0 0 8px transparent; opacity: 0.7; } }
+        .pulse-glow { animation: pulseglow 2.2s ease-in-out infinite; }
+        @keyframes sweep { 0% { transform: translateX(-120%) skewX(-15deg); } 100% { transform: translateX(220%) skewX(-15deg); } }
+        .sweep-cta { position: relative; overflow: hidden; }
+        .sweep-cta::after {
+          content: ""; position: absolute; top: 0; left: 0; width: 30%; height: 100%;
+          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+          animation: sweep 3.2s ease-in-out infinite; animation-delay: 1s;
+        }
+        .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .glow-card { box-shadow: 0 8px 30px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03); transition: box-shadow .3s ease, transform .3s cubic-bezier(0.34,1.56,0.64,1); }
+        .glow-card:active { transform: scale(0.985); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: ${BORDER}; border-radius: 10px; }
+        * { scrollbar-width: thin; scrollbar-color: ${BORDER} transparent; }
+        @keyframes auroradrift { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(-6%, 4%) scale(1.08); } 66% { transform: translate(4%, -5%) scale(0.96); } }
+        .aurora-drift { animation: auroradrift 14s ease-in-out infinite; }
+        @keyframes gradientflow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .gradient-text { background: linear-gradient(90deg, ${LIME}, #E8FFA8, ${LIME}, #8FE000); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientflow 4s ease-in-out infinite; }
+        @keyframes segmentpop { 0% { transform: scaleY(0.6); opacity: 0; } 60% { transform: scaleY(1.08); opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
+        .segment-pill { animation: segmentpop .38s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        @keyframes ringburst { 0% { box-shadow: 0 0 0 0 currentColor; opacity: 0.7; } 100% { box-shadow: 0 0 0 18px transparent; opacity: 0; } }
+        .ring-burst { position: relative; }
+        .ring-burst::before {
+          content: ""; position: absolute; inset: -3px; border-radius: 999px; border: 2px solid currentColor;
+          animation: ringburst 1.2s cubic-bezier(0.16,1,0.3,1) 1; pointer-events: none;
+        }
+        @keyframes barflow { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        .bar-flow { background-size: 200% 100%; animation: barflow 2.4s linear infinite; }
+        .modal-blur { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        @keyframes sheetup { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .sheet-up { animation: sheetup .42s cubic-bezier(0.16,1,0.3,1) both; }
+        @keyframes spinslow { to { transform: rotate(360deg); } }
+        .spin-slow { animation: spinslow 8s linear infinite; }
+
+        /* ---- Smoothness / performance layer ---- */
+        html { scroll-behavior: smooth; }
+        * { -webkit-tap-highlight-color: transparent; }
+        button, a, label, select, input[type="file"] { touch-action: manipulation; }
+        body { overscroll-behavior-y: contain; }
+        .tap-scale, .glow-card, .sweep-cta, .pulse-glow, .segment-slider {
+          will-change: transform; transform: translateZ(0); backface-visibility: hidden;
+        }
+        .hscroll { -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+        .hscroll > * { scroll-snap-align: start; }
+        img { content-visibility: auto; }
       `}</style>
 
       {/* Header */}
       <header className="relative px-5 pt-8 pb-7 overflow-hidden">
+        <div className="grain" />
         <div
-          className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full"
-          style={{ background: `radial-gradient(circle, ${LIME}22 0%, transparent 70%)` }}
+          className="aurora-drift pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full"
+          style={{ background: `radial-gradient(circle, ${LIME}22 0%, transparent 70%)`, animationDelay: "0s" }}
+        />
+        <div
+          className="aurora-drift pointer-events-none absolute -bottom-32 -left-20 w-80 h-80 rounded-full"
+          style={{ background: `radial-gradient(circle, ${CORAL}14 0%, transparent 70%)`, animationDelay: "3s" }}
+        />
+        <div
+          className="aurora-drift pointer-events-none absolute top-10 left-1/2 w-64 h-64 rounded-full"
+          style={{ background: `radial-gradient(circle, ${AMBER}0d 0%, transparent 70%)`, animationDelay: "6s" }}
         />
         <div className="relative">
           <div className="flex items-center justify-between gap-2 mb-5">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
+              <img src="/jmr-logo.png" alt="" className="w-4 h-4 object-contain opacity-80" />
+              <span className="w-1.5 h-1.5 rounded-full pulse-glow" style={{ background: LIME, color: LIME }} />
               <span className="body-f text-[11px] tracking-[0.25em] uppercase" style={{ color: MUTED }}>
                 {t.tagline}
               </span>
@@ -1247,7 +1306,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
               {installPrompt && !installed && (
                 <button
                   onClick={handleInstall}
-                  className="tap-scale flex items-center gap-1.5 px-3 py-1.5 rounded-full body-f text-xs font-semibold"
+                  className="sweep-cta tap-scale flex items-center gap-1.5 px-3 py-1.5 rounded-full body-f text-xs font-semibold"
                   style={{ background: LIME, color: "#0C1210" }}
                 >
                   <Download size={13} /> {t.installApp}
@@ -1282,25 +1341,34 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             className="display leading-[1.15]"
             style={{ color: TEXT, fontSize: "clamp(1.7rem, 8vw, 2.6rem)", overflowWrap: "break-word", wordBreak: "break-word" }}
           >
-            {t.headline1}<br /><em style={{ color: LIME, fontStyle: "italic" }}>{t.headlineEm}</em> {t.headline2}
+            {t.headline1}<br /><em className="gradient-text" style={{ fontStyle: "italic" }}>{t.headlineEm}</em> {t.headline2}
           </h1>
           <p className="body-f text-sm mt-3" style={{ color: MUTED }}>
             {t.subhead}
           </p>
 
           {/* Browse / Scan segmented control */}
-          <div className="flex gap-2 mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+          <div className="relative flex gap-2 mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+            <div
+              className="segment-slider absolute top-1 bottom-1 left-1 rounded-xl sweep-cta"
+              style={{
+                background: LIME,
+                width: "calc(50% - 6px)",
+                transform: view === "browse" ? "translateX(0)" : "translateX(calc(100% + 8px))",
+                transition: "transform .38s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
             <button
               onClick={() => { setView("browse"); resetScan(); }}
-              className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
-              style={{ background: view === "browse" ? LIME : "transparent", color: view === "browse" ? "#0C1210" : MUTED }}
+              className="relative z-10 tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ color: view === "browse" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
             >
               <Search size={14} /> {t.browse}
             </button>
             <button
               onClick={() => setView("scan")}
-              className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
-              style={{ background: view === "scan" ? LIME : "transparent", color: view === "scan" ? "#0C1210" : MUTED }}
+              className="relative z-10 tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ color: view === "scan" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
             >
               <ScanLine size={14} /> {t.scanTab}
             </button>
@@ -1358,7 +1426,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                   <button
                     key={p.id}
                     onClick={() => setSelected(p)}
-                    className="tap-scale text-left flex items-center gap-3 p-3.5 rounded-2xl animate-fade-in"
+                    className="glow-card tap-scale text-left flex items-center gap-3 p-3.5 rounded-2xl animate-fade-in"
                     style={{ background: SURFACE, border: `1px solid ${BORDER}`, animationDelay: `${Math.min(i, 8) * 30}ms` }}
                   >
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 relative" style={{ background: SURFACE_2 }}>
@@ -1398,17 +1466,17 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
               <div className="pt-2">
                 <div className="grid grid-cols-2 gap-3">
                   <label
-                    className="tap-scale relative overflow-hidden flex flex-col items-center justify-center gap-2.5 py-9 rounded-2xl cursor-pointer"
-                    style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
+                    className="glow-card tap-scale relative overflow-hidden flex flex-col items-center justify-center gap-2.5 py-9 rounded-2xl cursor-pointer"
+                    style={{ background: SURFACE, border: `1px solid ${LIME}35` }}
                   >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: LIME + "18" }}>
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center pulse-glow" style={{ background: LIME + "18", color: LIME + "40" }}>
                       <Camera size={20} color={LIME} />
                     </div>
                     <span className="body-f text-sm font-semibold" style={{ color: TEXT }}>{t.cameraLabel}</span>
                     <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
                   </label>
                   <label
-                    className="tap-scale flex flex-col items-center justify-center gap-2.5 py-9 rounded-2xl cursor-pointer"
+                    className="glow-card tap-scale flex flex-col items-center justify-center gap-2.5 py-9 rounded-2xl cursor-pointer"
                     style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
                   >
                     <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ background: SURFACE_2 }}>
@@ -1425,7 +1493,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
                 {recentScans.length > 0 && (
                   <div className="mt-7 animate-fade-in">
                     <p className="body-f text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: MUTED }}>{t.recentScansTitle}</p>
-                    <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
+                    <div className="hscroll flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
                       {recentScans.slice(0, 10).map((item, i) => {
                         const { level } = analyzeSafety(item);
                         const dot = { clean: LIME, moderate: AMBER, high: CORAL }[level];
@@ -1465,7 +1533,10 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             {scanStatus === "loading" && (
               <div className="animate-fade-in">
                 <div className="flex items-center gap-2 justify-center py-4 body-f" style={{ color: MUTED }}>
-                  <Loader2 className="animate-spin" size={15} color={LIME} />
+                  <span className="relative inline-flex items-center justify-center w-4 h-4">
+                    <Loader2 className="animate-spin absolute" size={15} color={LIME} />
+                    <span className="spin-slow absolute inset-[-4px] rounded-full" style={{ border: `1px dashed ${LIME}55` }} />
+                  </span>
                   <p className="text-sm">{t.readingLabel}</p>
                 </div>
                 <div className="rounded-3xl overflow-hidden p-5" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
