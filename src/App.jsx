@@ -834,7 +834,7 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
                   style={{ background: LIME, color: "#0C1210" }}
                 >
                   <Camera size={13} /> {t.checkClaims}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleClaimsPhoto(e.target.files?.[0])} />
+                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleClaimsPhoto(e.target.files?.[0])} />
                 </label>
               </div>
             )}
@@ -854,7 +854,7 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
                   style={{ background: LIME, color: "#0C1210" }}
                 >
                   <Camera size={13} /> {t.checkClaims}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleClaimsPhoto(e.target.files?.[0])} />
+                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleClaimsPhoto(e.target.files?.[0])} />
                 </label>
               </div>
             )}
