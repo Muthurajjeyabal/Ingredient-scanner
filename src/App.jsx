@@ -1348,7 +1348,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
           </p>
 
           {/* Browse / Scan segmented control */}
-          <div className="relative flex gap-2 mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
+          <div className="relative flex mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
             <div
               className="segment-slider absolute top-1 bottom-1 left-1 rounded-xl sweep-cta"
               style={{
@@ -1360,15 +1360,15 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             />
             <button
               onClick={() => { setView("browse"); resetScan(); }}
-              className="relative z-10 tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
-              style={{ color: view === "browse" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
+              className="relative z-10 tap-scale flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ width: "50%", color: view === "browse" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
             >
               <Search size={14} /> {t.browse}
             </button>
             <button
               onClick={() => setView("scan")}
-              className="relative z-10 tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
-              style={{ color: view === "scan" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
+              className="relative z-10 tap-scale flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ width: "50%", color: view === "scan" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
             >
               <ScanLine size={14} /> {t.scanTab}
             </button>
