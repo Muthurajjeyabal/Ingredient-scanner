@@ -1348,27 +1348,18 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
           </p>
 
           {/* Browse / Scan segmented control */}
-          <div className="relative flex mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
-            <div
-              className="segment-slider absolute top-1 bottom-1 left-1 rounded-xl sweep-cta"
-              style={{
-                background: LIME,
-                width: "calc(50% - 6px)",
-                transform: view === "browse" ? "translateX(0)" : "translateX(calc(100% + 8px))",
-                transition: "transform .38s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              }}
-            />
+          <div className="flex gap-2 mt-6 p-1 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
             <button
               onClick={() => { setView("browse"); resetScan(); }}
-              className="relative z-10 tap-scale flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
-              style={{ width: "50%", color: view === "browse" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
+              className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ background: view === "browse" ? LIME : "transparent", color: view === "browse" ? "#0C1210" : MUTED, transition: "background .25s ease, color .25s ease" }}
             >
               <Search size={14} /> {t.browse}
             </button>
             <button
               onClick={() => setView("scan")}
-              className="relative z-10 tap-scale flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
-              style={{ width: "50%", color: view === "scan" ? "#0C1210" : MUTED, transition: "color .25s ease" }}
+              className="tap-scale flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold body-f"
+              style={{ background: view === "scan" ? LIME : "transparent", color: view === "scan" ? "#0C1210" : MUTED, transition: "background .25s ease, color .25s ease" }}
             >
               <ScanLine size={14} /> {t.scanTab}
             </button>
