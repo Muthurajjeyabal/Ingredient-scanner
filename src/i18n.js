@@ -69,6 +69,7 @@ export const T = {
     claimsTitle: "Marketing claim check", claimsHint: "Photograph the FRONT of the pack to check its claims against the real ingredients.", checkClaims: "Scan front of pack", claimsLoading: "Checking claims…", claimsNone: "No marketing claims found on the front.", claimSupported: "Supported", claimNeedsContext: "Needs context", claimNotSupported: "Not supported",
     processedBecause: "Contains:", catSweetener: "Sweetener", catPreservative: "Preservative", catColour: "Colour", catFlavour: "Flavour", catThickener: "Thickener", catEmulsifier: "Emulsifier", catAcidRegulator: "Acidity regulator",
     mostCaloriesFromFat: "Most of the calories here come from fat.", nutritionNotAvailable: "Nutrition info wasn't found in this scan — try a photo of the nutrition table if the pack has one.",
+    differentLangNote: "This was originally scanned in a different language — scan again to get it in this language.",
     scanConfidenceHigh: "Label read clearly", scanConfidencePartial: "Part of the label wasn't fully clear — worth double-checking against the pack",
   },
   hi: {
@@ -124,6 +125,7 @@ export const T = {
     claimsTitle: "मार्केटिंग दावा जांच", claimsHint: "पैकेट के आगे की फोटो लेकर उसके दावों को असली सामग्री से जांचें।", checkClaims: "पैकेट का अगला भाग स्कैन करें", claimsLoading: "दावे जांचे जा रहे हैं…", claimsNone: "आगे कोई मार्केटिंग दावा नहीं मिला।", claimSupported: "सही साबित", claimNeedsContext: "और जानकारी चाहिए", claimNotSupported: "साबित नहीं होता",
     processedBecause: "इसमें ये हैं:", catSweetener: "स्वीटनर", catPreservative: "परिरक्षक", catColour: "रंग", catFlavour: "फ्लेवर", catThickener: "गाढ़ा करने वाला", catEmulsifier: "इमल्सिफायर", catAcidRegulator: "अम्लता नियामक",
     mostCaloriesFromFat: "यहाँ ज़्यादातर कैलोरी वसा से आती है।", nutritionNotAvailable: "इस स्कैन में पोषण जानकारी नहीं मिली — अगर पैकेट पर न्यूट्रिशन टेबल है तो उसकी फोटो लेकर देखें।",
+    differentLangNote: "यह पहले किसी और भाषा में स्कैन किया गया था — इस भाषा में पाने के लिए दोबारा स्कैन करें।",
     scanConfidenceHigh: "लेबल साफ़ पढ़ा गया", scanConfidencePartial: "लेबल का कुछ हिस्सा साफ़ नहीं था — पैकेट से एक बार मिला लें",
   },
   bn: {
@@ -179,6 +181,7 @@ export const T = {
     claimsTitle: "মার্কেটিং দাবি যাচাই", claimsHint: "প্যাকেটের সামনের ছবি তুলে দাবিগুলো আসল উপাদানের সাথে যাচাই করুন।", checkClaims: "প্যাকেটের সামনে স্ক্যান করুন", claimsLoading: "দাবি যাচাই হচ্ছে…", claimsNone: "সামনে কোনো মার্কেটিং দাবি পাওয়া যায়নি।", claimSupported: "সমর্থিত", claimNeedsContext: "আরও তথ্য দরকার", claimNotSupported: "সমর্থিত নয়",
     processedBecause: "এতে আছে:", catSweetener: "মিষ্টিকারক", catPreservative: "সংরক্ষক", catColour: "রঙ", catFlavour: "স্বাদ", catThickener: "ঘনকারী", catEmulsifier: "ইমালসিফায়ার", catAcidRegulator: "অ্যাসিডিটি নিয়ন্ত্রক",
     mostCaloriesFromFat: "এখানে বেশিরভাগ ক্যালোরি চর্বি থেকে আসে।", nutritionNotAvailable: "এই স্ক্যানে পুষ্টি তথ্য পাওয়া যায়নি — প্যাকেটে নিউট্রিশন টেবিল থাকলে তার ছবি তুলে দেখুন।",
+    differentLangNote: "এটি আগে অন্য একটি ভাষায় স্ক্যান করা হয়েছিল — এই ভাষায় পেতে আবার স্ক্যান করুন।",
     scanConfidenceHigh: "লেবেল স্পষ্ট পড়া হয়েছে", scanConfidencePartial: "লেবেলের কিছু অংশ স্পষ্ট ছিল না — প্যাকেটের সাথে মিলিয়ে দেখা ভালো",
   },
   te: {
@@ -234,6 +237,7 @@ export const T = {
     claimsTitle: "మార్కెటింగ్ క్లెయిమ్ చెక్", claimsHint: "ప్యాకెట్ ముందు భాగం ఫోటో తీసి, దాని క్లెయిమ్‌లను నిజమైన పదార్థాలతో సరిచూడండి.", checkClaims: "ప్యాకెట్ ముందు భాగం స్కాన్ చేయండి", claimsLoading: "క్లెయిమ్‌లు తనిఖీ చేస్తోంది…", claimsNone: "ముందు భాగంలో మార్కెటింగ్ క్లెయిమ్‌లు ఏమీ కనిపించలేదు.", claimSupported: "నిజమే", claimNeedsContext: "మరింత సమాచారం కావాలి", claimNotSupported: "నిజం కాదు",
     processedBecause: "ఇందులో ఇవి ఉన్నాయి:", catSweetener: "స్వీటెనర్", catPreservative: "ప్రిజర్వేటివ్", catColour: "రంగు", catFlavour: "ఫ్లేవర్", catThickener: "గట్టిపరిచేది", catEmulsifier: "ఎమల్సిఫైయర్", catAcidRegulator: "ఆమ్లత్వ నియంత్రిక",
     mostCaloriesFromFat: "ఇక్కడ ఎక్కువ కేలరీలు కొవ్వు నుండి వస్తాయి.", nutritionNotAvailable: "ఈ స్కాన్‌లో పోషకాహార సమాచారం దొరకలేదు — ప్యాకెట్‌పై న్యూట్రిషన్ టేబుల్ ఉంటే దాని ఫోటో తీయండి.",
+    differentLangNote: "ఇది ముందు వేరే భాషలో స్కాన్ చేయబడింది — ఈ భాషలో పొందడానికి మళ్ళీ స్కాన్ చేయండి.",
     scanConfidenceHigh: "లేబుల్ స్పష్టంగా చదవబడింది", scanConfidencePartial: "లేబుల్‌లో కొంత భాగం స్పష్టంగా లేదు — ప్యాకెట్‌తో సరిచూసుకోవడం మంచిది",
   },
   mr: {
@@ -289,6 +293,7 @@ export const T = {
     claimsTitle: "मार्केटिंग दावा तपासणी", claimsHint: "पॅकेटच्या पुढील बाजूचा फोटो घेऊन दावे खऱ्या घटकांशी तपासा.", checkClaims: "पॅकेटची पुढील बाजू स्कॅन करा", claimsLoading: "दावे तपासले जात आहेत…", claimsNone: "पुढील बाजूला कोणतेही मार्केटिंग दावे आढळले नाहीत.", claimSupported: "खरे ठरते", claimNeedsContext: "अधिक माहिती हवी", claimNotSupported: "खरे ठरत नाही",
     processedBecause: "यात हे आहे:", catSweetener: "स्वीटनर", catPreservative: "प्रिझर्व्हेटिव्ह", catColour: "रंग", catFlavour: "फ्लेवर", catThickener: "घट्ट करणारे", catEmulsifier: "इमल्सिफायर", catAcidRegulator: "आम्लता नियंत्रक",
     mostCaloriesFromFat: "इथे बहुतांश कॅलरी चरबीतून येतात.", nutritionNotAvailable: "या स्कॅनमध्ये पोषण माहिती सापडली नाही — पॅकेटवर न्यूट्रिशन टेबल असल्यास त्याचा फोटो घ्या.",
+    differentLangNote: "हे आधी दुसऱ्या भाषेत स्कॅन केले होते — या भाषेत मिळवण्यासाठी पुन्हा स्कॅन करा.",
     scanConfidenceHigh: "लेबल स्पष्ट वाचले गेले", scanConfidencePartial: "लेबलचा काही भाग स्पष्ट नव्हता — पॅकेटशी एकदा पडताळून पहा",
   },
   ta: {
@@ -344,6 +349,7 @@ export const T = {
     claimsTitle: "Marketing claim சரிபார்ப்பு", claimsHint: "Packet-ஓட முன்பக்கம் புகைப்படம் எடுத்து, அதுல சொல்றதை உண்மையான ingredients-ஓட ஒப்பிட்டு பாருங்க.", checkClaims: "Packet முன்பக்கம் scan செய்", claimsLoading: "Claims சரிபார்க்குது…", claimsNone: "முன்பக்கத்தில் எந்த marketing claim-உம் கிடைக்கல.", claimSupported: "உண்மைதான்", claimNeedsContext: "இன்னும் தகவல் தேவை", claimNotSupported: "உண்மையில்ல",
     processedBecause: "இதுல இருக்குறது:", catSweetener: "Sweetener", catPreservative: "Preservative", catColour: "நிறமி", catFlavour: "Flavour", catThickener: "Thickener", catEmulsifier: "Emulsifier", catAcidRegulator: "Acidity regulator",
     mostCaloriesFromFat: "இதுல பெரும்பாலான calories fat-ல் இருந்து வருது.", nutritionNotAvailable: "இந்த scan-ல nutrition தகவல் கிடைக்கல் — packet-ல nutrition table இருந்தா அதோட photo எடுத்து பாருங்க.",
+    differentLangNote: "இது முன்பு வேற ஒரு language-ல scan பண்ணப்பட்டது — இந்த language-ல வேணும்னா மறுபடியும் scan பண்ணுங்க.",
     scanConfidenceHigh: "லேபிள் தெளிவா படிக்கப்பட்டது", scanConfidencePartial: "லேபிள்-ஓட ஒரு பகுதி தெளிவா இல்ல — packet-ஓட ஒரு தடவை சரிபார்த்துக்குங்க",
   },
   ur: {
@@ -399,6 +405,7 @@ export const T = {
     claimsTitle: "مارکیٹنگ دعویٰ کی جانچ", claimsHint: "پیکٹ کے سامنے کی تصویر لے کر دعووں کو اصل اجزاء سے جانچیں۔", checkClaims: "پیکٹ کا اگلا حصہ اسکین کریں", claimsLoading: "دعووں کی جانچ ہو رہی ہے…", claimsNone: "سامنے کوئی مارکیٹنگ دعویٰ نہیں ملا۔", claimSupported: "درست ثابت", claimNeedsContext: "مزید معلومات درکار", claimNotSupported: "درست ثابت نہیں",
     processedBecause: "اس میں یہ شامل ہیں:", catSweetener: "میٹھا کرنے والا", catPreservative: "محافظ", catColour: "رنگ", catFlavour: "ذائقہ", catThickener: "گاڑھا کرنے والا", catEmulsifier: "ایمولسیفائر", catAcidRegulator: "تیزابیت ریگولیٹر",
     mostCaloriesFromFat: "یہاں زیادہ تر کیلوریز چکنائی سے آتی ہیں۔", nutritionNotAvailable: "اس اسکین میں غذائیت کی معلومات نہیں ملیں — اگر پیکٹ پر نیوٹریشن ٹیبل ہے تو اس کی تصویر لیں۔",
+    differentLangNote: "یہ پہلے کسی اور زبان میں اسکین کیا گیا تھا — اس زبان میں پانے کے لیے دوبارہ اسکین کریں۔",
     scanConfidenceHigh: "لیبل واضح طور پر پڑھا گیا", scanConfidencePartial: "لیبل کا کچھ حصہ واضح نہیں تھا — پیکٹ سے ملا کر دیکھ لیں",
   },
   gu: {
@@ -454,6 +461,7 @@ export const T = {
     claimsTitle: "માર્કેટિંગ દાવા ચકાસણી", claimsHint: "પેકેટની આગળની બાજુનો ફોટો લઈને દાવાઓને ખરા ઘટકો સાથે ચકાસો.", checkClaims: "પેકેટની આગળની બાજુ સ્કેન કરો", claimsLoading: "દાવા ચકાસાઈ રહ્યા છે…", claimsNone: "આગળ કોઈ માર્કેટિંગ દાવો મળ્યો નથી.", claimSupported: "સાચું ઠરે છે", claimNeedsContext: "વધુ માહિતી જોઈએ", claimNotSupported: "સાચું ઠરતું નથી",
     processedBecause: "આમાં આ છે:", catSweetener: "સ્વીટનર", catPreservative: "પ્રિઝર્વેટિવ", catColour: "રંગ", catFlavour: "ફ્લેવર", catThickener: "ઘટ્ટ કરનાર", catEmulsifier: "ઇમલ્સિફાયર", catAcidRegulator: "એસિડિટી નિયમનકાર",
     mostCaloriesFromFat: "અહીં મોટાભાગની કેલરી ચરબીમાંથી આવે છે.", nutritionNotAvailable: "આ સ્કેનમાં પોષણ માહિતી મળી નથી — પેકેટ પર ન્યુટ્રિશન ટેબલ હોય તો તેનો ફોટો લો.",
+    differentLangNote: "આ પહેલા બીજી ભાષામાં સ્કેન થયું હતું — આ ભાષામાં મેળવવા ફરીથી સ્કેન કરો.",
     scanConfidenceHigh: "લેબલ સ્પષ્ટ વંચાયું", scanConfidencePartial: "લેબલનો થોડો ભાગ સ્પષ્ટ નહોતો — પેકેટ સાથે એકવાર ખાતરી કરો",
   },
   kn: {
@@ -509,6 +517,7 @@ export const T = {
     claimsTitle: "ಮಾರ್ಕೆಟಿಂಗ್ ಕ್ಲೈಮ್ ಪರಿಶೀಲನೆ", claimsHint: "ಪ್ಯಾಕೆಟ್‌ನ ಮುಂಭಾಗದ ಫೋಟೋ ತೆಗೆದು, ಅದರ ಕ್ಲೈಮ್‌ಗಳನ್ನು ನಿಜವಾದ ಪದಾರ್ಥಗಳೊಂದಿಗೆ ಪರಿಶೀಲಿಸಿ.", checkClaims: "ಪ್ಯಾಕೆಟ್ ಮುಂಭಾಗ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ", claimsLoading: "ಕ್ಲೈಮ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…", claimsNone: "ಮುಂಭಾಗದಲ್ಲಿ ಯಾವುದೇ ಮಾರ್ಕೆಟಿಂಗ್ ಕ್ಲೈಮ್ ಕಂಡುಬಂದಿಲ್ಲ.", claimSupported: "ನಿಜ", claimNeedsContext: "ಹೆಚ್ಚಿನ ಮಾಹಿತಿ ಬೇಕು", claimNotSupported: "ನಿಜವಲ್ಲ",
     processedBecause: "ಇದರಲ್ಲಿ ಇವು ಇವೆ:", catSweetener: "ಸಿಹಿಕಾರಕ", catPreservative: "ಸಂರಕ್ಷಕ", catColour: "ಬಣ್ಣ", catFlavour: "ಫ್ಲೇವರ್", catThickener: "ದಪ್ಪಗೊಳಿಸುವಿಕೆ", catEmulsifier: "ಎಮಲ್ಸಿಫೈಯರ್", catAcidRegulator: "ಆಮ್ಲೀಯತೆ ನಿಯಂತ್ರಕ",
     mostCaloriesFromFat: "ಇಲ್ಲಿ ಹೆಚ್ಚಿನ ಕ್ಯಾಲೋರಿಗಳು ಕೊಬ್ಬಿನಿಂದ ಬರುತ್ತವೆ.", nutritionNotAvailable: "ಈ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಪೋಷಣೆ ಮಾಹಿತಿ ಸಿಗಲಿಲ್ಲ — ಪ್ಯಾಕೆಟ್‌ನಲ್ಲಿ ನ್ಯೂಟ್ರಿಷನ್ ಟೇಬಲ್ ಇದ್ದರೆ ಅದರ ಫೋಟೋ ತೆಗೆಯಿರಿ.",
+    differentLangNote: "ಇದನ್ನು ಮೊದಲು ಬೇರೆ ಭಾಷೆಯಲ್ಲಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿತ್ತು — ಈ ಭಾಷೆಯಲ್ಲಿ ಪಡೆಯಲು ಮತ್ತೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.",
     scanConfidenceHigh: "ಲೇಬಲ್ ಸ್ಪಷ್ಟವಾಗಿ ಓದಲಾಗಿದೆ", scanConfidencePartial: "ಲೇಬಲ್‌ನ ಕೆಲವು ಭಾಗ ಸ್ಪಷ್ಟವಾಗಿರಲಿಲ್ಲ — ಪ್ಯಾಕೆಟ್‌ನೊಂದಿಗೆ ಒಮ್ಮೆ ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ",
   },
   ml: {
@@ -564,6 +573,7 @@ export const T = {
     claimsTitle: "മാർക്കറ്റിംഗ് ക്ലെയിം പരിശോധന", claimsHint: "പാക്കറ്റിന്റെ മുൻവശത്തിന്റെ ഫോട്ടോ എടുത്ത് ക്ലെയിമുകൾ യഥാർത്ഥ ചേരുവകളുമായി പരിശോധിക്കുക.", checkClaims: "പാക്കറ്റിന്റെ മുൻവശം സ്കാൻ ചെയ്യുക", claimsLoading: "ക്ലെയിമുകൾ പരിശോധിക്കുന്നു…", claimsNone: "മുൻവശത്ത് മാർക്കറ്റിംഗ് ക്ലെയിമുകൾ ഒന്നും കണ്ടെത്തിയില്ല.", claimSupported: "ശരിയാണ്", claimNeedsContext: "കൂടുതൽ വിവരം വേണം", claimNotSupported: "ശരിയല്ല",
     processedBecause: "ഇതിൽ ഇവ ഉണ്ട്:", catSweetener: "മധുരകാരി", catPreservative: "പ്രിസർവേറ്റീവ്", catColour: "നിറം", catFlavour: "ഫ്ലേവർ", catThickener: "കട്ടിയാക്കൽ", catEmulsifier: "എമൽസിഫയർ", catAcidRegulator: "അസിഡിറ്റി റെഗുലേറ്റർ",
     mostCaloriesFromFat: "ഇവിടെ കൂടുതൽ കലോറികളും കൊഴുപ്പിൽ നിന്നാണ്.", nutritionNotAvailable: "ഈ സ്കാനിൽ പോഷക വിവരം കണ്ടെത്തിയില്ല — പാക്കറ്റിൽ ന്യൂട്രീഷൻ ടേബിൾ ഉണ്ടെങ്കിൽ അതിന്റെ ഫോട്ടോ എടുക്കുക.",
+    differentLangNote: "ഇത് നേരത്തെ വേറൊരു ഭാഷയിൽ സ്കാൻ ചെയ്തതാണ് — ഈ ഭാഷയിൽ ലഭിക്കാൻ വീണ്ടും സ്കാൻ ചെയ്യുക.",
     scanConfidenceHigh: "ലേബൽ വ്യക്തമായി വായിച്ചു", scanConfidencePartial: "ലേബലിന്റെ ഒരു ഭാഗം വ്യക്തമായിരുന്നില്ല — പാക്കറ്റുമായി ഒന്ന് ഉറപ്പാക്കുക",
   },
   or: {
@@ -619,6 +629,7 @@ export const T = {
     claimsTitle: "ମାର୍କେଟିଂ ଦାବି ଯାଞ୍ଚ", claimsHint: "ପ୍ୟାକେଟର ସାମନା ଫଟୋ ଉଠାଇ ଦାବିଗୁଡ଼ିକୁ ପ୍ରକୃତ ଉପାଦାନ ସହ ଯାଞ୍ଚ କରନ୍ତୁ।", checkClaims: "ପ୍ୟାକେଟର ସାମନା ସ୍କାନ୍ କରନ୍ତୁ", claimsLoading: "ଦାବି ଯାଞ୍ଚ ହେଉଛି…", claimsNone: "ସାମନାରେ କୌଣସି ମାର୍କେଟିଂ ଦାବି ମିଳିଲା ନାହିଁ।", claimSupported: "ସତ୍ୟ", claimNeedsContext: "ଅଧିକ ସୂଚନା ଦରକାର", claimNotSupported: "ସତ୍ୟ ନୁହେଁ",
     processedBecause: "ଏଥିରେ ଏହା ଅଛି:", catSweetener: "ମିଠାକାରକ", catPreservative: "ସଂରକ୍ଷକ", catColour: "ରଙ୍ଗ", catFlavour: "ସ୍ୱାଦ", catThickener: "ଗାଢ଼କାରୀ", catEmulsifier: "ଏମଲ୍ସିଫାୟାର", catAcidRegulator: "ଅମ୍ଳତା ନିୟନ୍ତ୍ରକ",
     mostCaloriesFromFat: "ଏଠାରେ ଅଧିକାଂଶ କ୍ୟାଲୋରି ଚର୍ବିରୁ ଆସେ।", nutritionNotAvailable: "ଏହି ସ୍କାନରେ ପୁଷ୍ଟିକର ସୂଚନା ମିଳିଲା ନାହିଁ — ପ୍ୟାକେଟରେ ନ୍ୟୁଟ୍ରିସନ୍ ଟେବୁଲ୍ ଥିଲେ ତାହାର ଫଟୋ ନିଅନ୍ତୁ।",
+    differentLangNote: "ଏହା ପୂର୍ବରୁ ଅନ୍ୟ ଏକ ଭାଷାରେ ସ୍କାନ୍ ହୋଇଥିଲା — ଏହି ଭାଷାରେ ପାଇବାକୁ ପୁଣି ସ୍କାନ୍ କରନ୍ତୁ।",
     scanConfidenceHigh: "ଲେବଲ୍ ସ୍ପଷ୍ଟ ଭାବରେ ପଢ଼ାଗଲା", scanConfidencePartial: "ଲେବଲ୍‌ର କିଛି ଅଂଶ ସ୍ପଷ୍ଟ ନଥିଲା — ପ୍ୟାକେଟ୍ ସହ ଥରେ ନିଶ୍ଚିତ କରନ୍ତୁ",
   },
   pa: {
@@ -674,6 +685,7 @@ export const T = {
     claimsTitle: "ਮਾਰਕੀਟਿੰਗ ਦਾਅਵਾ ਜਾਂਚ", claimsHint: "ਪੈਕਟ ਦੇ ਅਗਲੇ ਹਿੱਸੇ ਦੀ ਫੋਟੋ ਲੈ ਕੇ ਦਾਅਵਿਆਂ ਨੂੰ ਅਸਲੀ ਸਮੱਗਰੀ ਨਾਲ ਜਾਂਚੋ।", checkClaims: "ਪੈਕਟ ਦਾ ਅਗਲਾ ਹਿੱਸਾ ਸਕੈਨ ਕਰੋ", claimsLoading: "ਦਾਅਵਿਆਂ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ…", claimsNone: "ਅੱਗੇ ਕੋਈ ਮਾਰਕੀਟਿੰਗ ਦਾਅਵਾ ਨਹੀਂ ਮਿਲਿਆ।", claimSupported: "ਸਹੀ ਸਾਬਤ", claimNeedsContext: "ਹੋਰ ਜਾਣਕਾਰੀ ਚਾਹੀਦੀ ਹੈ", claimNotSupported: "ਸਹੀ ਸਾਬਤ ਨਹੀਂ",
     processedBecause: "ਇਸ ਵਿੱਚ ਇਹ ਹਨ:", catSweetener: "ਮਿੱਠਾ ਕਰਨ ਵਾਲਾ", catPreservative: "ਪ੍ਰੀਜ਼ਰਵੇਟਿਵ", catColour: "ਰੰਗ", catFlavour: "ਸੁਆਦ", catThickener: "ਗਾੜ੍ਹਾ ਕਰਨ ਵਾਲਾ", catEmulsifier: "ਇਮਲਸੀਫਾਇਰ", catAcidRegulator: "ਐਸਿਡਿਟੀ ਰੈਗੂਲੇਟਰ",
     mostCaloriesFromFat: "ਇੱਥੇ ਜ਼ਿਆਦਾਤਰ ਕੈਲੋਰੀ ਚਰਬੀ ਤੋਂ ਆਉਂਦੀ ਹੈ।", nutritionNotAvailable: "ਇਸ ਸਕੈਨ ਵਿੱਚ ਪੋਸ਼ਣ ਜਾਣਕਾਰੀ ਨਹੀਂ ਮਿਲੀ — ਜੇ ਪੈਕਟ 'ਤੇ ਨਿਊਟ੍ਰੀਸ਼ਨ ਟੇਬਲ ਹੈ ਤਾਂ ਉਸਦੀ ਫੋਟੋ ਲਓ।",
+    differentLangNote: "ਇਹ ਪਹਿਲਾਂ ਕਿਸੇ ਹੋਰ ਭਾਸ਼ਾ ਵਿੱਚ ਸਕੈਨ ਕੀਤਾ ਗਿਆ ਸੀ — ਇਸ ਭਾਸ਼ਾ ਵਿੱਚ ਪਾਉਣ ਲਈ ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ।",
     scanConfidenceHigh: "ਲੇਬਲ ਸਪੱਸ਼ਟ ਪੜ੍ਹਿਆ ਗਿਆ", scanConfidencePartial: "ਲੇਬਲ ਦਾ ਕੁਝ ਹਿੱਸਾ ਸਪੱਸ਼ਟ ਨਹੀਂ ਸੀ — ਪੈਕਟ ਨਾਲ ਇੱਕ ਵਾਰ ਮਿਲਾ ਲਓ",
   },
   as: {
@@ -729,6 +741,7 @@ export const T = {
     claimsTitle: "মাৰ্কেটিং দাবী পৰীক্ষা", claimsHint: "পেকেটৰ সন্মুখৰ ফটো তুলি দাবীবোৰ প্ৰকৃত উপাদানৰ সৈতে পৰীক্ষা কৰক।", checkClaims: "পেকেটৰ সন্মুখ স্কেন কৰক", claimsLoading: "দাবী পৰীক্ষা কৰা হৈছে…", claimsNone: "সন্মুখত কোনো মাৰ্কেটিং দাবী পোৱা নগ'ল।", claimSupported: "সঁচা", claimNeedsContext: "অধিক তথ্য লাগে", claimNotSupported: "সঁচা নহয়",
     processedBecause: "ইয়াত এইবোৰ আছে:", catSweetener: "মিঠাকাৰক", catPreservative: "সংৰক্ষক", catColour: "ৰং", catFlavour: "স্বাদ", catThickener: "ঘনকাৰী", catEmulsifier: "ইমালচিফায়াৰ", catAcidRegulator: "অম্লীয়তা নিয়ন্ত্ৰক",
     mostCaloriesFromFat: "ইয়াত বেছিভাগ কেলৰি চৰ্বিৰ পৰা আহে।", nutritionNotAvailable: "এই স্কেনত পুষ্টি তথ্য পোৱা নগ'ল — পেকেটত নিউট্ৰিশ্যন টেবুল থাকিলে তাৰ ফটো তুলি চাওক।",
+    differentLangNote: "এইটো আগতে বেলেগ ভাষাত স্কেন কৰা হৈছিল — এই ভাষাত পাবলৈ পুনৰ স্কেন কৰক।",
     scanConfidenceHigh: "লেবেল স্পষ্টভাৱে পঢ়া হ'ল", scanConfidencePartial: "লেবেলৰ কিছু অংশ স্পষ্ট নাছিল — পেকেটৰ সৈতে এবাৰ নিশ্চিত কৰক",
   },
 };

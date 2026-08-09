@@ -604,7 +604,7 @@ function HowItWorks({ onClose, t }) {
   );
 }
 
-function DetailCard({ data, sourceLabel, t, currentLangMeta }) {
+function DetailCard({ data, sourceLabel, t, currentLangMeta, lang }) {
   const chemicals = asArray(data.chemicals);
   const allergens = asArray(data.allergens);
   const nutrition = data.nutrition;
@@ -677,6 +677,9 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
           </button>
         </div>
         {data.brand && <p className="body-f text-sm mt-1" style={{ color: MUTED }}>{data.brand}</p>}
+        {data._lang && lang && data._lang !== lang && (
+          <p className="body-f text-xs mt-2" style={{ color: AMBER }}>🌐 {t.differentLangNote}</p>
+        )}
         {asText(data.summary) && (
           <p className="body-f text-sm mt-3 leading-relaxed" style={{ color: TEXT, opacity: 0.85 }}>{asText(data.summary)}</p>
         )}
@@ -1093,7 +1096,7 @@ export default function App() {
       const withoutDupe = prev.filter(
         (p) => (p.name || p.product_name) !== (item.name || item.product_name)
       );
-      const next = [{ ...item, category: mode, _scannedAt: Date.now() }, ...withoutDupe];
+      const next = [{ ...item, category: mode, _scannedAt: Date.now(), _lang: lang }, ...withoutDupe];
       try {
         localStorage.setItem("insider_scanned_products", JSON.stringify(next));
       } catch {
@@ -1565,7 +1568,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
 
             {scanStatus === "done" && scanResult && (
               <div className="animate-fade-in">
-                <DetailCard data={scanResult} sourceLabel={t.scannedBadge} t={t} currentLangMeta={currentLangMeta} />
+                <DetailCard data={scanResult} sourceLabel={t.scannedBadge} t={t} currentLangMeta={currentLangMeta} lang={lang} />
                 <button onClick={resetScan} className="tap-scale body-f mt-4 w-full py-3 rounded-2xl text-sm font-semibold" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
                   {t.scanAnotherProduct}
                 </button>
