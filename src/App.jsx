@@ -603,15 +603,54 @@ function HowItWorks({ onClose, t }) {
   );
 }
 
-function DetailCard({ data, sourceLabel, t }) {
+function DetailCard({ data, sourceLabel, t, currentLangMeta }) {
   const chemicals = asArray(data.chemicals);
   const allergens = asArray(data.allergens);
   const nutrition = data.nutrition;
   const [toast, setToast] = useState("");
+  const [claimsStatus, setClaimsStatus] = useState("idle"); // idle | loading | done | error
+  const [claimsList, setClaimsList] = useState([]);
+  const [claimsError, setClaimsError] = useState("");
 
   const handleShare = async () => {
     await shareProduct(data, t, setToast);
     setTimeout(() => setToast(""), 2000);
+  };
+
+  const handleClaimsPhoto = async (file) => {
+    if (!file) return;
+    setClaimsStatus("loading");
+    setClaimsError("");
+    try {
+      const { base64, mediaType } = await compressImage(file, 1024, 0.7);
+      const knownInfo = JSON.stringify({
+        ingredients: asText(data.ingredients),
+        chemicals: asArray(data.chemicals),
+        nutrition: data.nutrition || null,
+      });
+      const prompt = `This is a photo of the FRONT of an Indian product pack. Read any marketing claims or descriptive text printed on it (words/phrases like "Natural", "No Added Sugar", "Healthy", "Rich in Protein", "Low Fat", "100% Pure", etc. — ignore the brand name and plain product name, only pick out actual claims). Respond with ONLY a raw JSON object (no markdown fences, no commentary) in exactly this shape:
+{ "claims": [{ "claim": string, "assessment": "supported" | "needs_context" | "not_supported", "note": string }] }
+Assess each claim using ONLY this known ingredients/nutrition info already read from the back label: ${knownInfo}
+"assessment" is "supported" if this data clearly backs up the claim, "not_supported" if it contradicts the claim, and "needs_context" if it can't be confirmed either way from this information alone. "note" is one short sentence explaining why, based only on the given label evidence — never speculate or accuse, and never invent information not present above.
+Write "claim" and "note" in ${currentLangMeta.english} (using ${currentLangMeta.english} script).
+If no marketing claims are visible on the front pack, respond with exactly: {"claims": []}`;
+
+      const response = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaType, base64, prompt }),
+      });
+      if (!response.ok) throw new Error(`API error ${response.status}`);
+      const resData = await response.json();
+      const textOut = (resData.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+      if (!textOut) throw new Error("empty_response");
+      const parsed = extractJson(textOut);
+      setClaimsList(Array.isArray(parsed.claims) ? parsed.claims : []);
+      setClaimsStatus("done");
+    } catch (err) {
+      setClaimsError(err.message || String(err));
+      setClaimsStatus("error");
+    }
   };
 
   return (
@@ -776,6 +815,77 @@ function DetailCard({ data, sourceLabel, t }) {
                 );
               })()}
             </div>
+          </div>
+        )}
+
+        {asText(data.ingredients) && (
+          <div className="rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
+            <div className="p-4 flex items-center gap-2" style={{ borderBottom: claimsStatus !== "idle" || claimsList.length ? `1px solid ${BORDER}` : "none" }}>
+              <span className="text-sm">🔍</span>
+              <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.claimsTitle}</h3>
+            </div>
+
+            {claimsStatus === "idle" && (
+              <div className="p-4">
+                <p className="body-f text-xs mb-3" style={{ color: MUTED }}>{t.claimsHint}</p>
+                <label
+                  className="tap-scale inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer"
+                  style={{ background: LIME, color: "#0C1210" }}
+                >
+                  <Camera size={13} /> {t.checkClaims}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleClaimsPhoto(e.target.files?.[0])} />
+                </label>
+              </div>
+            )}
+
+            {claimsStatus === "loading" && (
+              <div className="p-4 flex items-center gap-2">
+                <Loader2 size={14} className="animate-spin" color={LIME} />
+                <p className="body-f text-xs" style={{ color: MUTED }}>{t.claimsLoading}</p>
+              </div>
+            )}
+
+            {claimsStatus === "error" && (
+              <div className="p-4">
+                <p className="body-f text-xs" style={{ color: CORAL }}>{claimsError}</p>
+                <label
+                  className="tap-scale inline-flex items-center gap-1.5 mt-2 px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer"
+                  style={{ background: LIME, color: "#0C1210" }}
+                >
+                  <Camera size={13} /> {t.checkClaims}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleClaimsPhoto(e.target.files?.[0])} />
+                </label>
+              </div>
+            )}
+
+            {claimsStatus === "done" && (
+              <div className="p-4">
+                {claimsList.length === 0 ? (
+                  <p className="body-f text-xs" style={{ color: MUTED }}>{t.claimsNone}</p>
+                ) : (
+                  <div className="space-y-3">
+                    {claimsList.map((c, i) => {
+                      const cfg = {
+                        supported: { color: LIME, label: t.claimSupported },
+                        needs_context: { color: AMBER, label: t.claimNeedsContext },
+                        not_supported: { color: CORAL, label: t.claimNotSupported },
+                      }[c.assessment] || { color: MUTED, label: c.assessment };
+                      return (
+                        <div key={i} className="pb-3" style={{ borderBottom: i < claimsList.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <p className="body-f text-sm font-semibold" style={{ color: TEXT }}>"{asText(c.claim)}"</p>
+                            <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: cfg.color + "1a", color: cfg.color }}>
+                              {cfg.label}
+                            </span>
+                          </div>
+                          <p className="body-f text-xs" style={{ color: MUTED }}>{asText(c.note)}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1278,7 +1388,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
             <button onClick={() => setSelected(null)} className="body-f flex items-center gap-1 text-xs font-semibold mb-4" style={{ color: MUTED }}>
               <ChevronLeft size={14} /> {t.backToList}
             </button>
-            <DetailCard data={selected} t={t} />
+            <DetailCard data={selected} t={t} currentLangMeta={currentLangMeta} />
           </div>
         )}
 
@@ -1383,7 +1493,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
 
             {scanStatus === "done" && scanResult && (
               <div className="animate-fade-in">
-                <DetailCard data={scanResult} sourceLabel={t.scannedBadge} t={t} />
+                <DetailCard data={scanResult} sourceLabel={t.scannedBadge} t={t} currentLangMeta={currentLangMeta} />
                 <button onClick={resetScan} className="tap-scale body-f mt-4 w-full py-3 rounded-2xl text-sm font-semibold" style={{ background: SURFACE, border: `1px solid ${BORDER}`, color: TEXT }}>
                   {t.scanAnotherProduct}
                 </button>
