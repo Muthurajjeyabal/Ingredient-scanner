@@ -1,7 +1,7 @@
 {
-  "name": "Insider — Know what's really inside",
+  "name": "Insider — Know what's really inside | by JMR Apps",
   "short_name": "Insider",
-  "description": "Scan any product label to see its ingredients, chemicals, allergens and nutrition.",
+  "description": "Scan any product label to see its ingredients, chemicals, allergens and nutrition. By JMR Apps.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
