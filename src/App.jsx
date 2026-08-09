@@ -770,7 +770,7 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
           </div>
         )}
 
-        {nutrition && (
+        {nutrition && Object.values(nutrition).some((v) => v != null) ? (
           <div>
             <div className="flex items-center gap-2 mb-2.5">
               <Flame size={15} color={CORAL} />
@@ -788,6 +788,16 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
               <p className="body-f text-xs mt-2.5" style={{ color: MUTED }}>🥑 {t.mostCaloriesFromFat}</p>
             )}
           </div>
+        ) : (
+          sourceLabel && (
+            <div>
+              <div className="flex items-center gap-2 mb-2.5">
+                <Flame size={15} color={MUTED} />
+                <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.nutritionTitle}</h3>
+              </div>
+              <p className="body-f text-sm" style={{ color: MUTED }}>{t.nutritionNotAvailable}</p>
+            </div>
+          )
         )}
 
         {(data.mfg_date_text || data.expiry_date_text || data.expiry_date_iso) && (
