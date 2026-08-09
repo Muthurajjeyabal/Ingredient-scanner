@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
@@ -75,11 +75,63 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+function SplashScreen({ onDone }) {
+  const [visible, setVisible] = useState(true);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setFading(true), 1100);
+    const doneTimer = setTimeout(() => {
+      setVisible(false);
+      onDone();
+    }, 1500);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [onDone]);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "#C6FF4D",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: fading ? 0 : 1,
+        transition: "opacity 380ms ease",
+      }}
+    >
+      <img
+        src="/jmr-logo.png"
+        alt="JMR Apps"
+        style={{ width: "44vw", maxWidth: 220, height: "auto" }}
+      />
+    </div>
+  );
+}
+
+function Root() {
+  const [showSplash, setShowSplash] = useState(true);
+  return (
+    <>
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </>
+  );
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <Root />
   </React.StrictMode>
 );
 

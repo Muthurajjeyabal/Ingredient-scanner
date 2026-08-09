@@ -597,6 +597,7 @@ function HowItWorks({ onClose, t }) {
         >
           {t.gotIt}
         </button>
+        <p className="text-center mt-4 body-f text-[10px]" style={{ color: MUTED, opacity: 0.6 }}>by JMR Apps</p>
       </div>
     </div>
   );
@@ -1397,6 +1398,7 @@ If the label truly isn't readable, respond with only: {"error": "Couldn't read t
           <Info size={13} className="shrink-0 mt-0.5" />
           <p>{t.footerPrefix} {DB.length} {t.footerSuffix}</p>
         </div>
+        <p className="text-center mt-4" style={{ opacity: 0.5 }}>by JMR Apps</p>
       </footer>
     </div>
   );
