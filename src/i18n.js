@@ -334,7 +334,7 @@ export const T = {
     noMajorConcern: "பெரிய பிரச்சனை ஒன்றும் இல்ல", highFat: "அதிக கொழுப்பு", highCalorie: "அதிக கலோரி",
     important: "முக்கியம்", assessmentNote: "இந்த மதிப்பீடு ingredients list மற்றும் nutrition label அடிப்படையிலானது. இது மருத்துவ ஆலோசனை இல்ல.",
     verdictEveryday: "சாதாரண அளவுல தினமும் use பண்ணலாம்.",
-    didYouKnow: "தெரிஞ்சிருக்காங்களா?", firstIngredientNote: "Ingredients அதிக அளவு இருக்குறதில் இருந்து குறைவா இருக்குறது வரை வரிசைப்படுத்தப்பட்டிருக்கும் — அதனால இதுதான் இந்த பொருளில் அதிக அளவு இருக்கும் பொருள்.", whatsInside: "உள்ள என்ன இருக்கு?",
+    didYouKnow: "உங்களுக்கு தெரியுமா?", firstIngredientNote: "Ingredients அதிக அளவு இருக்குறதில் இருந்து குறைவா இருக்குறது வரை வரிசைப்படுத்தப்பட்டிருக்கும் — அதனால இதுதான் இந்த பொருளில் அதிக அளவு இருக்கும் பொருள்.", whatsInside: "உள்ள என்ன இருக்கு?",
     datesTitle: "தயாரிப்பு & Expiry", mfgDateLabel: "தயாரிக்கப்பட்ட தேதி", expiryDateLabel: "Expiry தேதி", expiresInLabel: "Expire ஆகும்", expiredLabel: "Expire ஆயிடுச்சு", daysWord: "நாட்கள்", agoWord: "முன்பு",
     processedBecause: "இதுல இருக்குறது:", catSweetener: "Sweetener", catPreservative: "Preservative", catColour: "நிறமி", catFlavour: "Flavour", catThickener: "Thickener", catEmulsifier: "Emulsifier", catAcidRegulator: "Acidity regulator",
     mostCaloriesFromFat: "இதுல பெரும்பாலான calories fat-ல் இருந்து வருது.",
