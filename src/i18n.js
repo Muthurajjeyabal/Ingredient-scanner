@@ -70,6 +70,7 @@ export const T = {
     processedBecause: "Contains:", catSweetener: "Sweetener", catPreservative: "Preservative", catColour: "Colour", catFlavour: "Flavour", catThickener: "Thickener", catEmulsifier: "Emulsifier", catAcidRegulator: "Acidity regulator",
     mostCaloriesFromFat: "Most of the calories here come from fat.", nutritionNotAvailable: "Nutrition info wasn't found in this scan — try a photo of the nutrition table if the pack has one.",
     differentLangNote: "This was originally scanned in a different language — scan again to get it in this language.",
+    ingWhat: "What it is", ingSource: "Where it comes from", ingEffects: "Regular use effects", ingBenefits: "Benefit", ingRisks: "Risk", ingInfoNote: "General ingredient information — not medical advice.",
     scanConfidenceHigh: "Label read clearly", scanConfidencePartial: "Part of the label wasn't fully clear — worth double-checking against the pack",
   },
   hi: {
@@ -126,6 +127,7 @@ export const T = {
     processedBecause: "इसमें ये हैं:", catSweetener: "स्वीटनर", catPreservative: "परिरक्षक", catColour: "रंग", catFlavour: "फ्लेवर", catThickener: "गाढ़ा करने वाला", catEmulsifier: "इमल्सिफायर", catAcidRegulator: "अम्लता नियामक",
     mostCaloriesFromFat: "यहाँ ज़्यादातर कैलोरी वसा से आती है।", nutritionNotAvailable: "इस स्कैन में पोषण जानकारी नहीं मिली — अगर पैकेट पर न्यूट्रिशन टेबल है तो उसकी फोटो लेकर देखें।",
     differentLangNote: "यह पहले किसी और भाषा में स्कैन किया गया था — इस भाषा में पाने के लिए दोबारा स्कैन करें।",
+    ingWhat: "यह क्या है", ingSource: "कहाँ से आता है", ingEffects: "नियमित उपयोग का असर", ingBenefits: "फायदा", ingRisks: "जोखिम", ingInfoNote: "सामान्य सामग्री जानकारी — चिकित्सीय सलाह नहीं।",
     scanConfidenceHigh: "लेबल साफ़ पढ़ा गया", scanConfidencePartial: "लेबल का कुछ हिस्सा साफ़ नहीं था — पैकेट से एक बार मिला लें",
   },
   bn: {
@@ -182,6 +184,7 @@ export const T = {
     processedBecause: "এতে আছে:", catSweetener: "মিষ্টিকারক", catPreservative: "সংরক্ষক", catColour: "রঙ", catFlavour: "স্বাদ", catThickener: "ঘনকারী", catEmulsifier: "ইমালসিফায়ার", catAcidRegulator: "অ্যাসিডিটি নিয়ন্ত্রক",
     mostCaloriesFromFat: "এখানে বেশিরভাগ ক্যালোরি চর্বি থেকে আসে।", nutritionNotAvailable: "এই স্ক্যানে পুষ্টি তথ্য পাওয়া যায়নি — প্যাকেটে নিউট্রিশন টেবিল থাকলে তার ছবি তুলে দেখুন।",
     differentLangNote: "এটি আগে অন্য একটি ভাষায় স্ক্যান করা হয়েছিল — এই ভাষায় পেতে আবার স্ক্যান করুন।",
+    ingWhat: "এটি কী", ingSource: "কোথা থেকে আসে", ingEffects: "নিয়মিত ব্যবহারের প্রভাব", ingBenefits: "উপকারিতা", ingRisks: "ঝুঁকি", ingInfoNote: "সাধারণ উপাদান তথ্য — চিকিৎসা পরামর্শ নয়।",
     scanConfidenceHigh: "লেবেল স্পষ্ট পড়া হয়েছে", scanConfidencePartial: "লেবেলের কিছু অংশ স্পষ্ট ছিল না — প্যাকেটের সাথে মিলিয়ে দেখা ভালো",
   },
   te: {
@@ -238,6 +241,7 @@ export const T = {
     processedBecause: "ఇందులో ఇవి ఉన్నాయి:", catSweetener: "స్వీటెనర్", catPreservative: "ప్రిజర్వేటివ్", catColour: "రంగు", catFlavour: "ఫ్లేవర్", catThickener: "గట్టిపరిచేది", catEmulsifier: "ఎమల్సిఫైయర్", catAcidRegulator: "ఆమ్లత్వ నియంత్రిక",
     mostCaloriesFromFat: "ఇక్కడ ఎక్కువ కేలరీలు కొవ్వు నుండి వస్తాయి.", nutritionNotAvailable: "ఈ స్కాన్‌లో పోషకాహార సమాచారం దొరకలేదు — ప్యాకెట్‌పై న్యూట్రిషన్ టేబుల్ ఉంటే దాని ఫోటో తీయండి.",
     differentLangNote: "ఇది ముందు వేరే భాషలో స్కాన్ చేయబడింది — ఈ భాషలో పొందడానికి మళ్ళీ స్కాన్ చేయండి.",
+    ingWhat: "ఇది ఏమిటి", ingSource: "ఎక్కడ నుండి వస్తుంది", ingEffects: "క్రమం తప్పకుండా వాడితే ప్రభావం", ingBenefits: "ప్రయోజనం", ingRisks: "ప్రమాదం", ingInfoNote: "సాధారణ పదార్థ సమాచారం — వైద్య సలహా కాదు.",
     scanConfidenceHigh: "లేబుల్ స్పష్టంగా చదవబడింది", scanConfidencePartial: "లేబుల్‌లో కొంత భాగం స్పష్టంగా లేదు — ప్యాకెట్‌తో సరిచూసుకోవడం మంచిది",
   },
   mr: {
@@ -294,6 +298,7 @@ export const T = {
     processedBecause: "यात हे आहे:", catSweetener: "स्वीटनर", catPreservative: "प्रिझर्व्हेटिव्ह", catColour: "रंग", catFlavour: "फ्लेवर", catThickener: "घट्ट करणारे", catEmulsifier: "इमल्सिफायर", catAcidRegulator: "आम्लता नियंत्रक",
     mostCaloriesFromFat: "इथे बहुतांश कॅलरी चरबीतून येतात.", nutritionNotAvailable: "या स्कॅनमध्ये पोषण माहिती सापडली नाही — पॅकेटवर न्यूट्रिशन टेबल असल्यास त्याचा फोटो घ्या.",
     differentLangNote: "हे आधी दुसऱ्या भाषेत स्कॅन केले होते — या भाषेत मिळवण्यासाठी पुन्हा स्कॅन करा.",
+    ingWhat: "हे काय आहे", ingSource: "कुठून येते", ingEffects: "नियमित वापराचा परिणाम", ingBenefits: "फायदा", ingRisks: "धोका", ingInfoNote: "सामान्य घटक माहिती — वैद्यकीय सल्ला नाही.",
     scanConfidenceHigh: "लेबल स्पष्ट वाचले गेले", scanConfidencePartial: "लेबलचा काही भाग स्पष्ट नव्हता — पॅकेटशी एकदा पडताळून पहा",
   },
   ta: {
@@ -350,6 +355,7 @@ export const T = {
     processedBecause: "இதுல இருக்குறது:", catSweetener: "Sweetener", catPreservative: "Preservative", catColour: "நிறமி", catFlavour: "Flavour", catThickener: "Thickener", catEmulsifier: "Emulsifier", catAcidRegulator: "Acidity regulator",
     mostCaloriesFromFat: "இதுல பெரும்பாலான calories fat-ல் இருந்து வருது.", nutritionNotAvailable: "இந்த scan-ல nutrition தகவல் கிடைக்கல் — packet-ல nutrition table இருந்தா அதோட photo எடுத்து பாருங்க.",
     differentLangNote: "இது முன்பு வேற ஒரு language-ல scan பண்ணப்பட்டது — இந்த language-ல வேணும்னா மறுபடியும் scan பண்ணுங்க.",
+    ingWhat: "இது என்ன", ingSource: "எங்க இருந்து வருது", ingEffects: "தொடர்ந்து use பண்ணா என்ன ஆகும்", ingBenefits: "நன்மை", ingRisks: "பாதிப்பு", ingInfoNote: "பொது ingredient தகவல் — மருத்துவ ஆலோசனை இல்ல.",
     scanConfidenceHigh: "லேபிள் தெளிவா படிக்கப்பட்டது", scanConfidencePartial: "லேபிள்-ஓட ஒரு பகுதி தெளிவா இல்ல — packet-ஓட ஒரு தடவை சரிபார்த்துக்குங்க",
   },
   ur: {
@@ -406,6 +412,7 @@ export const T = {
     processedBecause: "اس میں یہ شامل ہیں:", catSweetener: "میٹھا کرنے والا", catPreservative: "محافظ", catColour: "رنگ", catFlavour: "ذائقہ", catThickener: "گاڑھا کرنے والا", catEmulsifier: "ایمولسیفائر", catAcidRegulator: "تیزابیت ریگولیٹر",
     mostCaloriesFromFat: "یہاں زیادہ تر کیلوریز چکنائی سے آتی ہیں۔", nutritionNotAvailable: "اس اسکین میں غذائیت کی معلومات نہیں ملیں — اگر پیکٹ پر نیوٹریشن ٹیبل ہے تو اس کی تصویر لیں۔",
     differentLangNote: "یہ پہلے کسی اور زبان میں اسکین کیا گیا تھا — اس زبان میں پانے کے لیے دوبارہ اسکین کریں۔",
+    ingWhat: "یہ کیا ہے", ingSource: "کہاں سے آتا ہے", ingEffects: "باقاعدہ استعمال کا اثر", ingBenefits: "فائدہ", ingRisks: "خطرہ", ingInfoNote: "عام جزو کی معلومات — طبی مشورہ نہیں۔",
     scanConfidenceHigh: "لیبل واضح طور پر پڑھا گیا", scanConfidencePartial: "لیبل کا کچھ حصہ واضح نہیں تھا — پیکٹ سے ملا کر دیکھ لیں",
   },
   gu: {
@@ -462,6 +469,7 @@ export const T = {
     processedBecause: "આમાં આ છે:", catSweetener: "સ્વીટનર", catPreservative: "પ્રિઝર્વેટિવ", catColour: "રંગ", catFlavour: "ફ્લેવર", catThickener: "ઘટ્ટ કરનાર", catEmulsifier: "ઇમલ્સિફાયર", catAcidRegulator: "એસિડિટી નિયમનકાર",
     mostCaloriesFromFat: "અહીં મોટાભાગની કેલરી ચરબીમાંથી આવે છે.", nutritionNotAvailable: "આ સ્કેનમાં પોષણ માહિતી મળી નથી — પેકેટ પર ન્યુટ્રિશન ટેબલ હોય તો તેનો ફોટો લો.",
     differentLangNote: "આ પહેલા બીજી ભાષામાં સ્કેન થયું હતું — આ ભાષામાં મેળવવા ફરીથી સ્કેન કરો.",
+    ingWhat: "આ શું છે", ingSource: "ક્યાંથી આવે છે", ingEffects: "નિયમિત ઉપયોગની અસર", ingBenefits: "ફાયદો", ingRisks: "જોખમ", ingInfoNote: "સામાન્ય ઘટક માહિતી — તબીબી સલાહ નથી.",
     scanConfidenceHigh: "લેબલ સ્પષ્ટ વંચાયું", scanConfidencePartial: "લેબલનો થોડો ભાગ સ્પષ્ટ નહોતો — પેકેટ સાથે એકવાર ખાતરી કરો",
   },
   kn: {
@@ -518,6 +526,7 @@ export const T = {
     processedBecause: "ಇದರಲ್ಲಿ ಇವು ಇವೆ:", catSweetener: "ಸಿಹಿಕಾರಕ", catPreservative: "ಸಂರಕ್ಷಕ", catColour: "ಬಣ್ಣ", catFlavour: "ಫ್ಲೇವರ್", catThickener: "ದಪ್ಪಗೊಳಿಸುವಿಕೆ", catEmulsifier: "ಎಮಲ್ಸಿಫೈಯರ್", catAcidRegulator: "ಆಮ್ಲೀಯತೆ ನಿಯಂತ್ರಕ",
     mostCaloriesFromFat: "ಇಲ್ಲಿ ಹೆಚ್ಚಿನ ಕ್ಯಾಲೋರಿಗಳು ಕೊಬ್ಬಿನಿಂದ ಬರುತ್ತವೆ.", nutritionNotAvailable: "ಈ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಪೋಷಣೆ ಮಾಹಿತಿ ಸಿಗಲಿಲ್ಲ — ಪ್ಯಾಕೆಟ್‌ನಲ್ಲಿ ನ್ಯೂಟ್ರಿಷನ್ ಟೇಬಲ್ ಇದ್ದರೆ ಅದರ ಫೋಟೋ ತೆಗೆಯಿರಿ.",
     differentLangNote: "ಇದನ್ನು ಮೊದಲು ಬೇರೆ ಭಾಷೆಯಲ್ಲಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿತ್ತು — ಈ ಭಾಷೆಯಲ್ಲಿ ಪಡೆಯಲು ಮತ್ತೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.",
+    ingWhat: "ಇದು ಏನು", ingSource: "ಎಲ್ಲಿಂದ ಬರುತ್ತದೆ", ingEffects: "ನಿಯಮಿತ ಬಳಕೆಯ ಪರಿಣಾಮ", ingBenefits: "ಪ್ರಯೋಜನ", ingRisks: "ಅಪಾಯ", ingInfoNote: "ಸಾಮಾನ್ಯ ಪದಾರ್ಥ ಮಾಹಿತಿ — ವೈದ್ಯಕೀಯ ಸಲಹೆ ಅಲ್ಲ.",
     scanConfidenceHigh: "ಲೇಬಲ್ ಸ್ಪಷ್ಟವಾಗಿ ಓದಲಾಗಿದೆ", scanConfidencePartial: "ಲೇಬಲ್‌ನ ಕೆಲವು ಭಾಗ ಸ್ಪಷ್ಟವಾಗಿರಲಿಲ್ಲ — ಪ್ಯಾಕೆಟ್‌ನೊಂದಿಗೆ ಒಮ್ಮೆ ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ",
   },
   ml: {
@@ -574,6 +583,7 @@ export const T = {
     processedBecause: "ഇതിൽ ഇവ ഉണ്ട്:", catSweetener: "മധുരകാരി", catPreservative: "പ്രിസർവേറ്റീവ്", catColour: "നിറം", catFlavour: "ഫ്ലേവർ", catThickener: "കട്ടിയാക്കൽ", catEmulsifier: "എമൽസിഫയർ", catAcidRegulator: "അസിഡിറ്റി റെഗുലേറ്റർ",
     mostCaloriesFromFat: "ഇവിടെ കൂടുതൽ കലോറികളും കൊഴുപ്പിൽ നിന്നാണ്.", nutritionNotAvailable: "ഈ സ്കാനിൽ പോഷക വിവരം കണ്ടെത്തിയില്ല — പാക്കറ്റിൽ ന്യൂട്രീഷൻ ടേബിൾ ഉണ്ടെങ്കിൽ അതിന്റെ ഫോട്ടോ എടുക്കുക.",
     differentLangNote: "ഇത് നേരത്തെ വേറൊരു ഭാഷയിൽ സ്കാൻ ചെയ്തതാണ് — ഈ ഭാഷയിൽ ലഭിക്കാൻ വീണ്ടും സ്കാൻ ചെയ്യുക.",
+    ingWhat: "ഇത് എന്താണ്", ingSource: "എവിടെ നിന്ന് വരുന്നു", ingEffects: "സ്ഥിരമായ ഉപയോഗത്തിന്റെ ഫലം", ingBenefits: "ഗുണം", ingRisks: "അപകടസാധ്യത", ingInfoNote: "പൊതു ചേരുവ വിവരം — മെഡിക്കൽ ഉപദേശമല്ല.",
     scanConfidenceHigh: "ലേബൽ വ്യക്തമായി വായിച്ചു", scanConfidencePartial: "ലേബലിന്റെ ഒരു ഭാഗം വ്യക്തമായിരുന്നില്ല — പാക്കറ്റുമായി ഒന്ന് ഉറപ്പാക്കുക",
   },
   or: {
@@ -630,6 +640,7 @@ export const T = {
     processedBecause: "ଏଥିରେ ଏହା ଅଛି:", catSweetener: "ମିଠାକାରକ", catPreservative: "ସଂରକ୍ଷକ", catColour: "ରଙ୍ଗ", catFlavour: "ସ୍ୱାଦ", catThickener: "ଗାଢ଼କାରୀ", catEmulsifier: "ଏମଲ୍ସିଫାୟାର", catAcidRegulator: "ଅମ୍ଳତା ନିୟନ୍ତ୍ରକ",
     mostCaloriesFromFat: "ଏଠାରେ ଅଧିକାଂଶ କ୍ୟାଲୋରି ଚର୍ବିରୁ ଆସେ।", nutritionNotAvailable: "ଏହି ସ୍କାନରେ ପୁଷ୍ଟିକର ସୂଚନା ମିଳିଲା ନାହିଁ — ପ୍ୟାକେଟରେ ନ୍ୟୁଟ୍ରିସନ୍ ଟେବୁଲ୍ ଥିଲେ ତାହାର ଫଟୋ ନିଅନ୍ତୁ।",
     differentLangNote: "ଏହା ପୂର୍ବରୁ ଅନ୍ୟ ଏକ ଭାଷାରେ ସ୍କାନ୍ ହୋଇଥିଲା — ଏହି ଭାଷାରେ ପାଇବାକୁ ପୁଣି ସ୍କାନ୍ କରନ୍ତୁ।",
+    ingWhat: "ଏହା କଣ", ingSource: "କେଉଁଠାରୁ ଆସେ", ingEffects: "ନିୟମିତ ବ୍ୟବହାରର ପ୍ରଭାବ", ingBenefits: "ଲାଭ", ingRisks: "ବିପଦ", ingInfoNote: "ସାଧାରଣ ଉପାଦାନ ସୂଚନା — ଚିକିତ୍ସା ପରାମର୍ଶ ନୁହେଁ।",
     scanConfidenceHigh: "ଲେବଲ୍ ସ୍ପଷ୍ଟ ଭାବରେ ପଢ଼ାଗଲା", scanConfidencePartial: "ଲେବଲ୍‌ର କିଛି ଅଂଶ ସ୍ପଷ୍ଟ ନଥିଲା — ପ୍ୟାକେଟ୍ ସହ ଥରେ ନିଶ୍ଚିତ କରନ୍ତୁ",
   },
   pa: {
@@ -686,6 +697,7 @@ export const T = {
     processedBecause: "ਇਸ ਵਿੱਚ ਇਹ ਹਨ:", catSweetener: "ਮਿੱਠਾ ਕਰਨ ਵਾਲਾ", catPreservative: "ਪ੍ਰੀਜ਼ਰਵੇਟਿਵ", catColour: "ਰੰਗ", catFlavour: "ਸੁਆਦ", catThickener: "ਗਾੜ੍ਹਾ ਕਰਨ ਵਾਲਾ", catEmulsifier: "ਇਮਲਸੀਫਾਇਰ", catAcidRegulator: "ਐਸਿਡਿਟੀ ਰੈਗੂਲੇਟਰ",
     mostCaloriesFromFat: "ਇੱਥੇ ਜ਼ਿਆਦਾਤਰ ਕੈਲੋਰੀ ਚਰਬੀ ਤੋਂ ਆਉਂਦੀ ਹੈ।", nutritionNotAvailable: "ਇਸ ਸਕੈਨ ਵਿੱਚ ਪੋਸ਼ਣ ਜਾਣਕਾਰੀ ਨਹੀਂ ਮਿਲੀ — ਜੇ ਪੈਕਟ 'ਤੇ ਨਿਊਟ੍ਰੀਸ਼ਨ ਟੇਬਲ ਹੈ ਤਾਂ ਉਸਦੀ ਫੋਟੋ ਲਓ।",
     differentLangNote: "ਇਹ ਪਹਿਲਾਂ ਕਿਸੇ ਹੋਰ ਭਾਸ਼ਾ ਵਿੱਚ ਸਕੈਨ ਕੀਤਾ ਗਿਆ ਸੀ — ਇਸ ਭਾਸ਼ਾ ਵਿੱਚ ਪਾਉਣ ਲਈ ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ।",
+    ingWhat: "ਇਹ ਕੀ ਹੈ", ingSource: "ਕਿੱਥੋਂ ਆਉਂਦਾ ਹੈ", ingEffects: "ਨਿਯਮਿਤ ਵਰਤੋਂ ਦਾ ਅਸਰ", ingBenefits: "ਫਾਇਦਾ", ingRisks: "ਖ਼ਤਰਾ", ingInfoNote: "ਆਮ ਸਮੱਗਰੀ ਜਾਣਕਾਰੀ — ਡਾਕਟਰੀ ਸਲਾਹ ਨਹੀਂ।",
     scanConfidenceHigh: "ਲੇਬਲ ਸਪੱਸ਼ਟ ਪੜ੍ਹਿਆ ਗਿਆ", scanConfidencePartial: "ਲੇਬਲ ਦਾ ਕੁਝ ਹਿੱਸਾ ਸਪੱਸ਼ਟ ਨਹੀਂ ਸੀ — ਪੈਕਟ ਨਾਲ ਇੱਕ ਵਾਰ ਮਿਲਾ ਲਓ",
   },
   as: {
@@ -742,6 +754,7 @@ export const T = {
     processedBecause: "ইয়াত এইবোৰ আছে:", catSweetener: "মিঠাকাৰক", catPreservative: "সংৰক্ষক", catColour: "ৰং", catFlavour: "স্বাদ", catThickener: "ঘনকাৰী", catEmulsifier: "ইমালচিফায়াৰ", catAcidRegulator: "অম্লীয়তা নিয়ন্ত্ৰক",
     mostCaloriesFromFat: "ইয়াত বেছিভাগ কেলৰি চৰ্বিৰ পৰা আহে।", nutritionNotAvailable: "এই স্কেনত পুষ্টি তথ্য পোৱা নগ'ল — পেকেটত নিউট্ৰিশ্যন টেবুল থাকিলে তাৰ ফটো তুলি চাওক।",
     differentLangNote: "এইটো আগতে বেলেগ ভাষাত স্কেন কৰা হৈছিল — এই ভাষাত পাবলৈ পুনৰ স্কেন কৰক।",
+    ingWhat: "এইটো কি", ingSource: "ক'ৰ পৰা আহে", ingEffects: "নিয়মীয়া ব্যৱহাৰৰ প্ৰভাৱ", ingBenefits: "লাভ", ingRisks: "বিপদ", ingInfoNote: "সাধাৰণ উপাদান তথ্য — চিকিৎসা পৰামৰ্শ নহয়।",
     scanConfidenceHigh: "লেবেল স্পষ্টভাৱে পঢ়া হ'ল", scanConfidencePartial: "লেবেলৰ কিছু অংশ স্পষ্ট নাছিল — পেকেটৰ সৈতে এবাৰ নিশ্চিত কৰক",
   },
 };

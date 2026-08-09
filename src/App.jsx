@@ -609,6 +609,7 @@ function DetailCard({ data, sourceLabel, t, currentLangMeta, lang }) {
   const allergens = asArray(data.allergens);
   const nutrition = data.nutrition;
   const [toast, setToast] = useState("");
+  const [expandedIngredient, setExpandedIngredient] = useState(null);
   const [claimsStatus, setClaimsStatus] = useState("idle"); // idle | loading | done | error
   const [claimsList, setClaimsList] = useState([]);
   const [claimsError, setClaimsError] = useState("");
@@ -713,19 +714,53 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
               <h3 className="body-f text-xs font-bold uppercase tracking-widest" style={{ color: MUTED }}>{t.whatsInside}</h3>
             </div>
             <div className="rounded-2xl overflow-hidden" style={{ background: SURFACE_2, border: `1px solid ${BORDER}` }}>
-              {data.key_ingredients.map((k, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 px-4 py-2.5"
-                  style={{ borderBottom: i < data.key_ingredients.length - 1 ? `1px solid ${BORDER}` : "none" }}
-                >
-                  <span className="text-base shrink-0">{ingredientIcon(k?.name)}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="body-f text-sm font-semibold truncate" style={{ color: TEXT }}>{asText(k?.name)}</p>
+              {data.key_ingredients.map((k, i) => {
+                const isOpen = expandedIngredient === i;
+                const hasDetail = k?.what || k?.source || k?.effects || k?.benefits || k?.risks;
+                return (
+                  <div key={i} style={{ borderBottom: i < data.key_ingredients.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                    <button
+                      onClick={() => hasDetail && setExpandedIngredient(isOpen ? null : i)}
+                      className="tap-scale w-full flex items-center gap-3 px-4 py-2.5 text-left"
+                      style={{ cursor: hasDetail ? "pointer" : "default" }}
+                    >
+                      <span className="text-base shrink-0">{ingredientIcon(k?.name)}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="body-f text-sm font-semibold truncate" style={{ color: TEXT }}>{asText(k?.name)}</p>
+                      </div>
+                      <span className="body-f text-[11px] shrink-0" style={{ color: MUTED }}>{asText(k?.role)}</span>
+                      {hasDetail && (
+                        <ChevronLeft
+                          size={14}
+                          color={MUTED}
+                          className="shrink-0"
+                          style={{ transform: isOpen ? "rotate(90deg)" : "rotate(-90deg)", transition: "transform .25s ease" }}
+                        />
+                      )}
+                    </button>
+                    {isOpen && hasDetail && (
+                      <div className="px-4 pb-3.5 -mt-0.5 space-y-2 animate-fade-in">
+                        {k?.what && (
+                          <div><span className="body-f text-[11px] font-bold" style={{ color: LIME }}>{t.ingWhat}: </span><span className="body-f text-xs" style={{ color: TEXT, opacity: 0.85 }}>{asText(k.what)}</span></div>
+                        )}
+                        {k?.source && (
+                          <div><span className="body-f text-[11px] font-bold" style={{ color: LIME }}>{t.ingSource}: </span><span className="body-f text-xs" style={{ color: TEXT, opacity: 0.85 }}>{asText(k.source)}</span></div>
+                        )}
+                        {k?.effects && (
+                          <div><span className="body-f text-[11px] font-bold" style={{ color: AMBER }}>{t.ingEffects}: </span><span className="body-f text-xs" style={{ color: TEXT, opacity: 0.85 }}>{asText(k.effects)}</span></div>
+                        )}
+                        {k?.benefits && (
+                          <div><span className="body-f text-[11px] font-bold" style={{ color: LIME }}>{t.ingBenefits}: </span><span className="body-f text-xs" style={{ color: TEXT, opacity: 0.85 }}>{asText(k.benefits)}</span></div>
+                        )}
+                        {k?.risks && (
+                          <div><span className="body-f text-[11px] font-bold" style={{ color: CORAL }}>{t.ingRisks}: </span><span className="body-f text-xs" style={{ color: TEXT, opacity: 0.85 }}>{asText(k.risks)}</span></div>
+                        )}
+                        <p className="body-f text-[10px] pt-1" style={{ color: MUTED }}>{t.ingInfoNote}</p>
+                      </div>
+                    )}
                   </div>
-                  <span className="body-f text-[11px] shrink-0" style={{ color: MUTED }}>{asText(k?.role)}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -1154,7 +1189,7 @@ export default function App() {
   "brand": string,
   "summary": string,
   "ingredients": string,
-  "key_ingredients": [{ "name": string, "role": string }],
+  "key_ingredients": [{ "name": string, "role": string, "what": string, "source": string, "effects": string, "benefits": string, "risks": string }],
   "meaning": string,
   "chemicals": string[],
   "allergens": string[],
@@ -1165,13 +1200,19 @@ export default function App() {
   "confidence": "high" | "partial"
 }
 "summary" is one short plain sentence describing what kind of product this is and its main ingredient base (e.g. "A vegetable-oil based mayonnaise with egg and preservatives.") — written for someone who knows nothing about the product yet.
-"key_ingredients" is a list of the 4-7 most significant ingredients IN THE ORDER THEY APPEAR on the label (which is largest-quantity first), each with a short "role" word (e.g. "Main base", "Sweetener", "Thickener", "Preservative", "Colour", "Flavour", "Emulsifier"). Only include what is actually declared on the label — never guess or invent an ingredient that isn't printed there.
+"key_ingredients" is a list of the 4-7 most significant ingredients IN THE ORDER THEY APPEAR on the label (which is largest-quantity first), each with a short "role" word (e.g. "Main base", "Sweetener", "Thickener", "Preservative", "Colour", "Flavour", "Emulsifier"). Only include what is actually declared on the label — never guess or invent an ingredient that isn't printed there. For each key ingredient, also fill in (using your general knowledge of that ingredient, not just the label):
+  - "what": one short sentence on what this substance actually is / what it's made of.
+  - "source": one short sentence on where or how it's typically produced (e.g. plant-derived, synthetically manufactured, animal-derived, mined mineral, etc.).
+  - "effects": one short, factual, non-alarmist sentence on what regularly consuming/using this ingredient over time is generally associated with, if anything notable — otherwise state plainly that regular use isn't associated with any particular effect.
+  - "benefits": one short sentence on any genuine functional or nutritional benefit it provides (can be as simple as its functional purpose if there's no health benefit) — never invent a benefit that isn't real.
+  - "risks": one short sentence on any commonly-discussed risk or concern, or state plainly "No notable risk commonly associated with typical use" if there isn't one — never exaggerate or invent a risk.
+  Keep every one of these five fields to a single plain sentence, written for a general reader with no scientific background. This is general consumer-education information, not medical advice — never phrase anything as a diagnosis or personal recommendation.
 "meaning" is one short interpretive sentence about what this ingredient mix tells the person — e.g. that a fruit-flavoured product isn't necessarily made mostly of that fruit, or that a product has several formulation/texture additives beyond its main base. Base this ONLY on what's printed on the label — if there's nothing notable to add beyond the summary, repeat the key point simply rather than inventing something.
 "mfg_date_text" is the manufacturing/packing date exactly as printed on the label (e.g. "07/2026" or "MFD: 15/07/2026"), or null if not visible.
 "expiry_date_text" is the expiry/"best before" text exactly as printed (e.g. "06/2027" or "Best before 12 months from mfg"), or null if not visible.
 "expiry_date_iso" is the actual expiry date in strict YYYY-MM-DD format, but ONLY if you can confidently determine an exact date — either because a full date is printed, or because both a manufacturing date and a relative duration (like "9 months from mfg") are printed and you can calculate it. Today's date is ${today}, for reference only — do not use it as the expiry date. If you can't confidently determine an exact date, set this to null rather than guessing.
 "confidence" should be "partial" if any part of the ingredients or nutrition text was blurry, cut off, or you had to guess at a word — otherwise "high".
-Write the "summary", "meaning", "ingredients", "allergens", and each key_ingredients "role"/"name" in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
+Write the "summary", "meaning", "ingredients", "allergens", and each key_ingredients "role"/"name"/"what"/"source"/"effects"/"benefits"/"risks" in ${currentLangMeta.english} (using ${currentLangMeta.english} script), since that's the language the person reading this speaks. However, keep the "chemicals" array entries in English exactly as printed (e.g. E-numbers, INCI names like "Sodium Lauryl Sulfate", "TBHQ") since these are technical/scientific names that should stay in their standard form regardless of language. Keep "name" and "brand" exactly as printed on the pack.
 If the label truly isn't readable, respond with only: {"error": "Couldn't read the label clearly — try a closer, well-lit photo"}`;
 
       const response = await fetch("/api/scan", {
