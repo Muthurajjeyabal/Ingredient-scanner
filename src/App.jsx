@@ -937,6 +937,20 @@ If no marketing claims are visible on the front pack, respond with exactly: {"cl
             )}
           </div>
         )}
+
+        <div className="text-center mt-6">
+          <a
+            className="body-f text-xs"
+            style={{ color: MUTED, textDecoration: "underline" }}
+            href={`mailto:muthurajjeyabal@gmail.com?subject=${encodeURIComponent(
+              "Insider — Incorrect result: " + (data.name || data.product_name || "")
+            )}&body=${encodeURIComponent(
+              `Product: ${data.name || data.product_name || ""}\nBrand: ${data.brand || ""}\n\nWhat looked wrong:\n\n\n(Please describe the issue above and attach a photo of the label if you can.)`
+            )}`}
+          >
+            🚩 {t.reportIssue}
+          </a>
+        </div>
       </div>
     </div>
   );
