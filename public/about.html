@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Insider — How accurate is this?</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #0C1210;
+        color: #F3F6F1;
+        line-height: 1.65;
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+      }
+      h1 { font-size: 1.6rem; margin-bottom: 4px; }
+      .sub { color: #8B9A8E; font-size: 0.9rem; margin-bottom: 32px; }
+      h2 { font-size: 1.1rem; margin-top: 32px; color: #C6FF4D; }
+      p, li { color: #D7DED6; font-size: 0.95rem; }
+      a { color: #C6FF4D; }
+      ul { padding-left: 20px; }
+      .card {
+        background: #161D19;
+        border: 1px solid #2A342D;
+        border-radius: 16px;
+        padding: 16px 18px;
+        margin-top: 12px;
+      }
+      .warn { border-color: #FFB64840; }
+      .warn h3 { color: #FFB648; margin: 0 0 6px; font-size: 0.95rem; }
+      .back {
+        display: inline-block;
+        margin-top: 40px;
+        padding: 10px 20px;
+        background: #C6FF4D;
+        color: #0C1210;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>About Insider</h1>
+    <p class="sub">How it works, and how accurate you can expect it to be — by JMR Apps</p>
+
+    <h2>What Insider does</h2>
+    <p>Insider reads the back-of-pack label on food, cosmetic, and personal-care products using AI, and turns it into a plain breakdown of ingredients, chemicals, allergens, and nutrition — so you don't have to decode confusing labels yourself.</p>
+
+    <h2>How the scan works</h2>
+    <p>When you photograph a label, the image is sent to an AI vision model (Google Gemini) that reads the printed text and structures it into the categories you see in the app — ingredients, additives, allergens, and nutrition facts. Nothing is looked up from an external product database for scanned items; everything comes directly from what's printed on your specific pack.</p>
+
+    <div class="card warn">
+      <h3>⚠️ AI can make mistakes</h3>
+      <p>Like any AI, it can occasionally misread blurry text, guess at a partially visible word, or miss a line entirely — especially with poor lighting, glare, or small print. The app shows a "partially readable" warning when it isn't confident, but it won't always catch every error.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="color:#F3F6F1;margin:0 0 6px;font-size:0.95rem;">✅ What we do to reduce errors</h3>
+      <ul>
+        <li>The AI is instructed to only report what's actually printed on the label — never to invent ingredients, allergens, or numbers that aren't there.</li>
+        <li>A confidence flag is shown when part of a label wasn't fully clear.</li>
+        <li>Marketing claim checks are based only on the label's own ingredient/nutrition data, not outside assumptions.</li>
+      </ul>
+    </div>
+
+    <h2>Please always double-check</h2>
+    <p>For anything that matters to your health — allergies, medical dietary restrictions, or medication interactions — always verify against the physical label yourself, or ask a pharmacist/doctor. Insider is a reading aid, not a certified food-safety or medical tool.</p>
+
+    <h2>Not medical advice</h2>
+    <p>The "safety" indicators, ingredient notes, and consumption suggestions in the app are general consumer-awareness information based on commonly-discussed additives and nutrition thresholds — not a medical assessment of you personally.</p>
+
+    <h2>Your data</h2>
+    <p>Scan history is stored only on your own device. See the <a href="/privacy.html">Privacy Policy</a> for full details.</p>
+
+    <h2>Found something wrong?</h2>
+    <p>If a scan result looks incorrect, please use the "Report incorrect result" option on that result in the app — it helps us keep improving accuracy.</p>
+
+    <a class="back" href="/">← Back to Insider</a>
+  </body>
+</html>
